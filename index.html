@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>浙招智达 · 管理后台</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230d9488' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 10v6M2 10l10-5 10 5-10 5z'/%3E%3Cpath d='M6 12v5c3 3 9 3 12 0v-5'/%3E%3C/svg%3E">
+<script>
+(function(){
+  function retry(){
+    if(window.echarts&&typeof initDashCharts==='function'){
+      if(window._echartsPending&&location.hash.indexOf('dashboard')>-1){window._echartsPending=false;try{initDashCharts();}catch(e){}}
+      return;
+    }
+    window._echartsPending=true;
+  }
+  var s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js';
+  s.onload=retry;
+  s.onerror=function(){
+    var s2=document.createElement('script');
+    s2.src='https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js';
+    s2.onload=retry;
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s);
+})();
+</script>
+<style>
+:root{
+  --t50:#f0fdfa;--t100:#ccfbf1;--t200:#99f6e4;--t300:#5eead4;--t400:#2dd4bf;--t500:#14b8a6;--t600:#0d9488;--t700:#0f766e;--t800:#115e59;--t900:#134e4a;
+  --s50:#f8fafc;--s100:#f1f5f9;--s200:#e2e8f0;--s300:#cbd5e1;--s400:#94a3b8;--s500:#64748b;--s600:#475569;--s700:#334155;--s800:#1e293b;--s900:#0f172a;
+  --primary:#0d9488;--primary-hover:#0f766e;--primary-deep:#115e59;
+  --bg:#f5f7f6;--card:#ffffff;--border:#e3e8ee;
+  --text:#0f172a;--muted:#64748b;
+  --success:#10b981;--success-bg:#d1fae5;--warning:#d97706;--warning-bg:#fef3c7;--danger:#dc2626;--danger-bg:#fee2e2;--info:#2563eb;--info-bg:#dbeafe;
+  --sidebar:#0e2e2a;--sidebar-hover:rgba(255,255,255,.05);--sidebar-active:rgba(45,212,191,.14);
+  --shadow-sm:0 1px 2px rgba(15,23,42,.05),0 1px 1px rgba(15,23,42,.03);
+  --shadow-md:0 8px 24px -8px rgba(15,23,42,.12);
+  --shadow-lg:0 24px 60px -20px rgba(15,23,42,.18);
+  --r-sm:4px;--r-md:8px;--r-lg:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Inter","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
+input,select,textarea{font-family:inherit;font-size:14px;color:var(--text)}
+::placeholder{color:#9aa8b8}
+a{color:var(--primary);text-decoration:none}
+svg{flex-shrink:0}
+.num{font-variant-numeric:tabular-nums}
+/* ===== 通用组件 ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:34px;padding:0 14px;border-radius:var(--r-md);font-size:13px;font-weight:500;border:1px solid var(--border);background:#fff;color:var(--s700);transition:all .15s;white-space:nowrap}
+.btn:hover{border-color:var(--t500);color:var(--primary);background:var(--t50)}
+.btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-hover);border-color:var(--primary-hover);color:#fff}
+.btn-danger{color:var(--danger)}
+.btn-danger:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-bg)}
+.btn-ghost{border-color:transparent;background:transparent;color:var(--s600)}
+.btn-ghost:hover{background:var(--s100);color:var(--s800);border-color:transparent}
+.btn-sm{height:28px;padding:0 10px;font-size:12px;border-radius:6px}
+.btn-lg{height:40px;padding:0 20px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:var(--r-md);color:var(--s500);transition:all .15s}
+.icon-btn:hover{background:var(--s100);color:var(--s800)}
+.input{height:34px;padding:0 12px;border:1px solid var(--border);border-radius:var(--r-md);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s}
+.input:focus{border-color:var(--t500);box-shadow:0 0 0 3px rgba(13,148,136,.12)}
+.select{height:34px;padding:0 10px;border:1px solid var(--border);border-radius:var(--r-md);background:#fff;outline:none;cursor:pointer}
+.select:focus{border-color:var(--t500)}
+.tag{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:500;line-height:1}
+.tag-teal{background:var(--t100);color:var(--t800)}
+.tag-blue{background:var(--info-bg);color:#1d4ed8}
+.tag-purple{background:#ede9fe;color:#6d28d9}
+.tag-gray{background:var(--s100);color:var(--s600)}
+.tag-green{background:var(--success-bg);color:#047857}
+.tag-amber{background:var(--warning-bg);color:#b45309}
+.tag-red{background:var(--danger-bg);color:#b91c1c}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-sm)}
+.card-pad{padding:20px}
+.card-title{font-size:15px;font-weight:600;color:var(--s800)}
+.card-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.table-wrap{overflow-x:auto}
+table.tbl{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}
+table.tbl th{background:var(--s50);color:var(--s600);font-weight:500;text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:1}
+table.tbl td{padding:10px 12px;border-bottom:1px solid var(--s100);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+table.tbl tr:hover td{background:#fafcfb}
+table.tbl tr:last-child td{border-bottom:none}
+.rowlink{color:var(--primary);font-weight:500;cursor:pointer}
+.rowlink:hover{text-decoration:underline}
+.op-links{display:flex;gap:2px}
+.op-links button{font-size:12.5px;color:var(--s500);padding:3px 7px;border-radius:6px;white-space:nowrap}
+.op-links button:hover{background:var(--t50);color:var(--primary)}
+.op-links button.danger:hover{background:var(--danger-bg);color:var(--danger)}
+.checkbox{width:16px;height:16px;accent-color:var(--primary);cursor:pointer}
+/* 弹窗 */
+.modal-mask{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+.modal-mask.open{display:flex}
+.modal{background:#fff;border-radius:var(--r-lg);box-shadow:var(--shadow-lg);width:100%;max-width:640px;animation:pop .18s ease}
+.modal-lg{max-width:860px}
+.modal-xl{max-width:1060px}
+@keyframes pop{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-head h3{font-size:16px;font-weight:600}
+.modal-body{padding:20px;max-height:calc(100vh - 220px);overflow-y:auto}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--border)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+.form-item{display:flex;flex-direction:column;gap:6px}
+.form-item.full{grid-column:1/-1}
+.form-item label{font-size:12.5px;color:var(--s600);font-weight:500}
+.form-item label .req{color:var(--danger);margin-left:2px}
+.form-item .hint{font-size:11.5px;color:#94a3b8}
+.form-sec{grid-column:1/-1;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:var(--s800);margin:6px 0 2px}
+.form-sec:first-child{margin-top:0}
+.form-sec::after{content:'';flex:1;height:1px;background:var(--s100)}
+/* toast */
+#toasts{position:fixed;bottom:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow-md);padding:10px 16px;font-size:13.5px;animation:slideIn .2s ease;max-width:360px}
+.toast.success .t-ico{color:var(--success)}.toast.error .t-ico{color:var(--danger)}.toast.info .t-ico{color:var(--info)}
+@keyframes slideIn{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
+/* 标签页 */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:18px}
+.tab-btn{padding:10px 16px;font-size:13.5px;color:var(--s500);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.tab-btn:hover{color:var(--s800)}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+/* 分页 */
+.pager{display:flex;align-items:center;justify-content:space-between;padding:12px 4px 2px;flex-wrap:wrap;gap:10px}
+.pager-info{font-size:12.5px;color:var(--muted)}
+.pager-btns{display:flex;align-items:center;gap:4px}
+.pg{min-width:30px;height:30px;padding:0 6px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--s600);font-size:12.5px;display:inline-flex;align-items:center;justify-content:center}
+.pg:hover{border-color:var(--t500);color:var(--primary)}
+.pg.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.pg:disabled{opacity:.4;cursor:not-allowed}
+/* 视图切换 */
+.view{display:none}
+.view.active{display:block;animation:fadeIn .18s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+/* 空态 */
+.empty{padding:48px 20px;text-align:center;color:var(--muted)}
+.empty .e-ico{width:48px;height:48px;margin:0 auto 12px;border-radius:50%;background:var(--s100);display:flex;align-items:center;justify-content:center;color:var(--s400)}
+.empty p{font-size:13.5px}
+.empty .btn{margin-top:14px}
+/* ===== 登录页 ===== */
+#view-login{position:fixed;inset:0;display:none;z-index:50}
+#view-login.active{display:flex}
+.login-wrap{display:flex;width:100%;height:100%}
+.login-brand{flex:1.15;background:linear-gradient(150deg,#0e2e2a 0%,#134e4a 55%,#115e59 100%);color:#fff;display:flex;flex-direction:column;justify-content:center;padding:64px;position:relative;overflow:hidden}
+.login-brand::before{content:"";position:absolute;right:-120px;top:-120px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(45,212,191,.28),transparent 65%)}
+.login-brand::after{content:"";position:absolute;left:-90px;bottom:-140px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(45,212,191,.16),transparent 65%)}
+.brand-logo{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.brand-logo .logo-ico{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#14b8a6,#0d9488);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 6px 16px rgba(20,184,166,.35)}
+.brand-name{font-size:22px;font-weight:700;letter-spacing:.5px}
+.brand-sub{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px;letter-spacing:2px}
+.login-brand h1{font-size:30px;font-weight:700;line-height:1.35;margin-top:44px;max-width:420px}
+.login-brand .slogan{font-size:15px;color:rgba(255,255,255,.72);margin-top:14px;max-width:430px;line-height:1.8}
+.login-stats{display:flex;gap:34px;margin-top:48px}
+.login-stats .ls{font-size:12.5px;color:rgba(255,255,255,.55)}
+.login-stats .ls b{display:block;font-size:24px;color:#fff;font-weight:700;margin-bottom:2px}
+.login-form{flex:1;display:flex;align-items:center;justify-content:center;background:#fff;padding:40px}
+.lf-card{width:100%;max-width:360px}
+.lf-card h2{font-size:24px;font-weight:700;letter-spacing:.5px}
+.lf-card .lf-sub{color:var(--muted);font-size:13.5px;margin-top:6px;margin-bottom:32px}
+.lf-field{margin-bottom:16px}
+.lf-field label{display:block;font-size:13px;color:var(--s700);margin-bottom:7px;font-weight:500}
+.lf-input{display:flex;align-items:center;gap:9px;height:42px;border:1px solid var(--border);border-radius:var(--r-md);padding:0 13px;transition:all .15s}
+.lf-input:focus-within{border-color:var(--t500);box-shadow:0 0 0 3px rgba(13,148,136,.12)}
+.lf-input svg{color:var(--s400)}
+.lf-input input{border:none;outline:none;flex:1;height:100%;font-size:14px}
+.lf-row{display:flex;align-items:center;justify-content:space-between;margin:6px 0 20px;font-size:12.5px}
+.lf-row label{display:flex;align-items:center;gap:6px;color:var(--s600);cursor:pointer}
+.lf-row a{color:var(--primary)}
+.lf-hint{margin-top:14px;text-align:center;font-size:12px;color:#94a3b8}
+/* ===== 应用外壳 ===== */
+#app{display:none;height:100vh;overflow:hidden}
+#app.active{display:flex}
+.sidebar{width:224px;background:var(--sidebar);color:#fff;display:flex;flex-direction:column;flex-shrink:0;transition:width .2s}
+.side-logo{display:flex;align-items:center;gap:10px;padding:16px 16px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.side-logo .logo-ico{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#14b8a6,#0d9488);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.side-logo .sl-name{font-size:15.5px;font-weight:700;letter-spacing:.5px}
+.side-logo .sl-sub{font-size:10.5px;color:rgba(255,255,255,.5);letter-spacing:1.5px;margin-top:1px}
+.nav{flex:1;overflow-y:auto;padding:10px 10px 16px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent}
+.nav::-webkit-scrollbar{width:4px}
+.nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px}
+.nav-group{margin-bottom:6px}
+.nav-glabel{font-size:11px;color:rgba(255,255,255,.42);letter-spacing:1px;padding:14px 12px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13.5px;color:rgba(255,255,255,.78);cursor:pointer;transition:all .12s;position:relative}
+.nav-item:hover{background:var(--sidebar-hover);color:#fff}
+.nav-item.active{background:var(--sidebar-active);color:var(--t300);font-weight:600}
+.nav-item .n-arrow{margin-left:auto;transition:transform .15s}
+.nav-item.open .n-arrow{transform:rotate(180deg)}
+.nav-sub{display:none;margin:2px 0 4px;padding-left:12px}
+.nav-sub.open{display:block}
+.nav-sub .nav-item{padding-left:34px;font-size:13px;padding-top:7px;padding-bottom:7px}
+.nav-sub .nav-item::before{content:"";position:absolute;left:20px;top:50%;width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.28);transform:translateY(-50%)}
+.nav-sub .nav-item.active::before{background:var(--t300)}
+.side-user{padding:12px 14px;border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px}
+.side-user .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2dd4bf,#0d9488);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.side-user .su-name{font-size:13px;font-weight:600;white-space:nowrap}
+.side-user .su-role{font-size:11px;color:rgba(255,255,255,.5)}
+.side-user .su-exit{margin-left:auto;color:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px}
+.side-user .su-exit:hover{background:var(--sidebar-hover);color:#fff}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:58px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 20px;flex-shrink:0}
+.tb-crumb{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted)}
+.tb-crumb b{color:var(--s800);font-weight:600}
+.tb-crumb .sep{color:var(--s300)}
+.tb-search{position:relative;margin-left:auto;width:280px}
+.tb-search .input{width:100%;padding-left:36px;height:34px;background:var(--s50);border-color:transparent}
+.tb-search .input:focus{background:#fff}
+.tb-search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--s400)}
+.tb-search-res{position:absolute;top:42px;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow-md);z-index:40;display:none;overflow:hidden}
+.tb-search-res.open{display:block}
+.tb-search-res .sr-item{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--s50)}
+.tb-search-res .sr-item:hover{background:var(--t50)}
+.tb-search-res .sr-item:last-child{border-bottom:none}
+.tb-actions{display:flex;align-items:center;gap:6px}
+.bell{position:relative}
+.bell .dot{position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:50%;background:#ef4444;border:2px solid #fff}
+.tb-user{display:flex;align-items:center;gap:9px;padding-left:12px;border-left:1px solid var(--border)}
+.tb-user .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2dd4bf,#0d9488);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700}
+.tb-user .tu-name{font-size:13px;font-weight:600}
+.tb-user .tu-role{font-size:11px;color:var(--muted)}
+.content{flex:1;overflow-y:auto;padding:22px 24px 40px}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.page-head h1{font-size:20px;font-weight:700;letter-spacing:.2px}
+.page-head .ph-sub{font-size:13px;color:var(--muted);margin-top:4px}
+.ph-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+/* ===== 工作台 ===== */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+.stat-card{padding:18px 20px;display:flex;align-items:flex-start;gap:14px}
+.stat-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stat-ico.teal{background:var(--t100);color:var(--t700)}
+.stat-ico.blue{background:var(--info-bg);color:#1d4ed8}
+.stat-ico.purple{background:#ede9fe;color:#6d28d9}
+.stat-ico.amber{background:var(--warning-bg);color:#b45309}
+.stat-val{font-size:24px;font-weight:700;line-height:1.2}
+.stat-lbl{font-size:12.5px;color:var(--muted);margin-top:2px}
+.stat-delta{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;margin-top:6px;padding:1px 7px;border-radius:999px;background:var(--success-bg);color:#047857;font-weight:500}
+.stat-delta.down{background:var(--danger-bg);color:#b91c1c}
+.dash-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:16px;margin-bottom:16px}
+.chart-card{padding:18px 20px}
+.chart-box{height:250px;margin-top:8px}
+.chart-donut{height:250px;margin-top:8px}
+.dash-grid2{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:16px}
+.list-item{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--s100)}
+.list-item:last-child{border-bottom:none}
+.list-item .avatar{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.li-main{flex:1;min-width:0}
+.li-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li-sub{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-ft{margin-top:12px;padding-top:12px;border-top:1px solid var(--s100);display:flex;justify-content:center}
+/* ===== 筛选条 ===== */
+.filter-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 16px;margin-bottom:14px}
+.filter-bar .input,.filter-bar .select{height:32px}
+.fb-label{font-size:12.5px;color:var(--s600);font-weight:500}
+/* ===== 表格工具栏 ===== */
+.toolbar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.toolbar .tb-title{font-size:14.5px;font-weight:600;margin-right:4px}
+.toolbar .spacer{flex:1}
+.badge-count{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:999px;background:var(--t100);color:var(--t800);font-size:11.5px;font-weight:600}
+/* ===== 用户详情 ===== */
+.user-hero{display:flex;align-items:center;gap:18px;padding:22px 24px;margin-bottom:16px;flex-wrap:wrap}
+.user-hero .avatar{width:64px;height:64px;border-radius:16px;font-size:24px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.uh-main{flex:1;min-width:240px}
+.uh-name{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:700}
+.uh-meta{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;font-size:12.5px;color:var(--muted)}
+.uh-meta span{display:flex;align-items:center;gap:5px}
+.uh-actions{display:flex;gap:10px;flex-wrap:wrap}
+.kv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kv{background:var(--s50);border:1px solid var(--s100);border-radius:var(--r-md);padding:12px 14px}
+.kv .k{font-size:11.5px;color:var(--muted);margin-bottom:4px}
+.kv .v{font-size:13.5px;color:var(--s800);font-weight:500;word-break:break-all}
+.grade-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.grade-cell{background:var(--s50);border:1px solid var(--s100);border-radius:var(--r-md);padding:10px 12px;text-align:center}
+.grade-cell .gc-sub{font-size:11.5px;color:var(--muted)}
+.grade-cell .gc-val{font-size:20px;font-weight:700;margin-top:2px}
+.chip-row{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:999px;background:#fff;border:1px solid var(--border);font-size:12.5px;color:var(--s700)}
+.chip.pick{background:var(--t50);border-color:var(--t300);color:var(--t700)}
+.chip.x{background:var(--danger-bg);border-color:transparent;color:var(--danger)}
+/* ===== 步骤条 ===== */
+.steps{display:flex;align-items:flex-start;margin-bottom:24px;padding:0 8px}
+.step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;gap:8px}
+.step:not(:last-child)::after{content:"";position:absolute;top:17px;left:calc(50% + 26px);right:calc(-50% + 26px);height:2px;background:var(--s200)}
+.step.done:not(:last-child)::after{background:var(--t500)}
+.step .s-dot{width:34px;height:34px;border-radius:50%;background:var(--s100);border:2px solid var(--s200);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--s500);z-index:1}
+.step.active .s-dot{background:var(--primary);border-color:var(--primary);color:#fff}
+.step.done .s-dot{background:var(--t500);border-color:var(--t500);color:#fff}
+.step .s-name{font-size:12.5px;color:var(--s600);text-align:center;padding:0 4px}
+.step.active .s-name{color:var(--primary);font-weight:600}
+.step.done .s-name{color:var(--t700)}
+.wizard-body{min-height:360px}
+.wz-actions{display:flex;justify-content:space-between;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+/* 方案类型卡片 */
+.type-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+.type-card{border:2px solid var(--border);border-radius:var(--r-lg);padding:22px;cursor:pointer;transition:all .15s;position:relative}
+.type-card:hover{border-color:var(--t400);box-shadow:var(--shadow-md)}
+.type-card.selected{border-color:var(--primary);background:var(--t50)}
+.type-card .tc-ico{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.type-card .tc-ico.teal{background:var(--t100);color:var(--t700)}
+.type-card .tc-ico.blue{background:var(--info-bg);color:#1d4ed8}
+.type-card h3{font-size:16px;font-weight:700}
+.type-card .tc-desc{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.7}
+.type-card .tc-count{position:absolute;top:14px;right:14px}
+/* 学考等级 */
+.grade-picker{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.gp-subject{background:var(--s50);border:1px solid var(--s100);border-radius:var(--r-md);padding:12px;text-align:center}
+.gp-subject .gp-name{font-size:13px;font-weight:600;margin-bottom:8px}
+.gp-opts{display:flex;justify-content:center;gap:4px}
+.gp-opt{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:12.5px;font-weight:600;color:var(--s500);display:inline-flex;align-items:center;justify-content:center;transition:all .12s}
+.gp-opt:hover{border-color:var(--t500);color:var(--primary)}
+.gp-opt.pick{background:var(--primary);border-color:var(--primary);color:#fff}
+.subject-pick{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:13px;cursor:pointer;transition:all .12s}
+.subject-pick:hover{border-color:var(--t400)}
+.subject-pick.pick{background:var(--t50);border-color:var(--t500);color:var(--t700);font-weight:600}
+/* 志愿选择 */
+.wz-split{display:grid;grid-template-columns:1.35fr 1fr;gap:18px;align-items:start}
+.major-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--r-md);margin-bottom:10px;background:#fff;transition:all .12s}
+.major-item:hover{border-color:var(--t400);box-shadow:var(--shadow-sm)}
+.major-item.added{border-color:var(--t300);background:var(--t50)}
+.mi-main{flex:1;min-width:0}
+.mi-name{font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:8px}
+.mi-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:5px;font-size:11.5px;color:var(--muted)}
+.mi-meta span{display:flex;align-items:center;gap:4px}
+.rl-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--border);border-radius:var(--r-md);margin-bottom:8px;background:#fff}
+.rl-item .rl-idx{width:26px;height:26px;border-radius:50%;background:var(--s100);color:var(--s600);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rl-item .rl-main{flex:1;min-width:0}
+.rl-item .rl-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rl-item .rl-sub{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rl-item .rl-op{display:flex;gap:2px}
+.rl-item .rl-op button{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--s400)}
+.rl-item .rl-op button:hover{background:var(--s100);color:var(--s700)}
+.rl-item .rl-op button.up:hover{color:var(--primary)}
+.rl-item .rl-op button.del:hover{background:var(--danger-bg);color:var(--danger)}
+.risk-badge{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:6px;font-size:11px;font-weight:600}
+.risk-chong{background:#fee2e2;color:#b91c1c}
+.risk-wen{background:var(--warning-bg);color:#b45309}
+.risk-bao{background:var(--success-bg);color:#047857}
+/* 方案预览 */
+.plan-preview{display:flex;flex-direction:column;gap:10px}
+.pp-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:#fff}
+.pp-main{flex:1;min-width:0}
+.pp-name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.pp-sub{font-size:12px;color:var(--muted);margin-top:4px;display:flex;gap:12px;flex-wrap:wrap}
+.pp-sub span{display:flex;align-items:center;gap:4px}
+.pp-score{text-align:right}
+.pp-score .ps-val{font-size:18px;font-weight:700;color:var(--primary)}
+.pp-score .ps-lbl{font-size:11px;color:var(--muted)}
+/* ===== 方案结果（对齐前端方案结果页呈现） ===== */
+.pr-hero{display:flex;align-items:flex-start;gap:14px;padding:18px 20px;border:1px solid var(--t200);border-radius:var(--r-lg);background:linear-gradient(135deg,#f0fdfa 0%,#fff 55%);margin-bottom:16px}
+.pr-hero .pr-h-ico{width:44px;height:44px;border-radius:12px;background:var(--t100);color:var(--t700);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pr-hero .pr-h-title{font-size:16.5px;font-weight:700;color:var(--s900);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pr-hero .pr-h-sub{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.7}
+.pr-hero .pr-h-meta{margin-left:auto;text-align:right;font-size:11.5px;color:var(--muted);display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.pr-score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.pr-score-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.pr-score-card .psc-ico{width:36px;height:36px;border-radius:9px;background:var(--t50);color:var(--t700);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pr-score-card .psc-cap{font-size:11px;color:var(--muted);margin-bottom:4px}
+.pr-score-card .psc-val{font-size:13px;font-weight:600;color:var(--s800);line-height:1.55;word-break:break-all}
+.pr-score-card .psc-val.num{font-size:22px;font-weight:700;color:var(--t700)}
+.risk-group{margin-bottom:18px}
+.risk-group .rg-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.risk-group .rg-badge{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:7px;font-size:12.5px;font-weight:700}
+.risk-group .rg-title{font-size:14.5px;font-weight:700;color:var(--s900)}
+.risk-group .rg-count{font-size:12px;color:var(--muted)}
+.risk-group .rg-note{font-size:12px;color:var(--muted);margin-left:auto}
+.risk-group .rg-cards{display:flex;flex-direction:column;gap:10px}
+.pr-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px}
+.pr-card .prc-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pr-card .prc-school{font-size:14.5px;font-weight:700;color:var(--s900)}
+.pr-card .prc-score{margin-left:auto;text-align:right}
+.pr-card .prc-score .pv{font-size:19px;font-weight:700;color:var(--primary)}
+.pr-card .prc-score .pl{font-size:11px;color:var(--muted)}
+.pr-card .prc-reason{font-size:12.5px;color:var(--s700);margin-top:9px;line-height:1.6;background:var(--s50);padding:9px 12px;border-radius:8px}
+.pr-card .prc-reason b{color:var(--s800)}
+.pr-card .prc-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pr-card .prc-meta .chip{font-size:11.5px;color:var(--s600);background:#fff;border:1px solid var(--s200);padding:3px 8px;border-radius:6px}
+.pr-card .prc-conf{margin-left:auto;text-align:right}
+.pr-card .prc-conf .pv{font-size:18px;font-weight:700;color:var(--primary)}
+.pr-card .prc-conf .pl{font-size:11px;color:var(--muted)}
+.pr-card .prc-group{margin-top:10px;padding:8px 12px;border:1px dashed var(--s200);border-radius:8px;font-size:12.5px;color:var(--s700);display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--s25,#fafcfb)}
+.pr-card .prc-group b{color:var(--s800)}
+.pr-card .prc-group .pg-majors{color:var(--s600)}
+.pr-timeline{margin-top:4px;position:relative;padding-left:18px;border-left:2px solid var(--s200)}
+.pr-tl-item{position:relative;padding:0 0 16px 14px}
+.pr-tl-item:last-child{padding-bottom:2px}
+.pr-tl-item::before{content:'';position:absolute;left:-23px;top:3px;width:10px;height:10px;border-radius:50%;background:var(--t600);border:2px solid #fff;box-shadow:0 0 0 2px var(--t100)}
+.pr-tl-item .pt-date{font-size:12.5px;font-weight:700;color:var(--t700)}
+.pr-tl-item .pt-title{font-size:13.5px;font-weight:600;color:var(--s800);margin-top:2px}
+.pr-tl-item .pt-desc{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.6}
+.pr-tips{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.pr-tip-box{border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px;background:#fff}
+.pr-tip-box h4{font-size:13.5px;font-weight:700;color:var(--s800);display:flex;align-items:center;gap:7px;margin-bottom:10px}
+.pr-tip-box ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.pr-tip-box li{font-size:12.5px;color:var(--s600);line-height:1.6;display:flex;gap:8px;align-items:flex-start}
+.pr-tip-box li svg{flex-shrink:0;margin-top:2px}
+.pr-selected{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.pr-selected .sel-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;background:var(--s50);border:1px solid var(--s200);border-radius:999px;padding:4px 10px;color:var(--s700)}
+.pr-selected .sel-chip .n{width:16px;height:16px;border-radius:50%;background:var(--t600);color:#fff;font-size:10.5px;display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+@media (max-width:1200px){.pr-score-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){.pr-score-grid{grid-template-columns:1fr}.pr-tips{grid-template-columns:1fr}.pr-hero{flex-direction:column}.pr-hero .pr-h-meta{margin-left:0;text-align:left}}
+/* 上传 */
+.upload-drop{border:2px dashed var(--s300);border-radius:var(--r-lg);padding:38px 20px;text-align:center;transition:all .15s;cursor:pointer;background:var(--s50)}
+.upload-drop:hover,.upload-drop.drag{border-color:var(--t500);background:var(--t50)}
+.upload-drop .ud-ico{width:52px;height:52px;margin:0 auto 14px;border-radius:50%;background:var(--t100);color:var(--t700);display:flex;align-items:center;justify-content:center}
+.upload-drop h4{font-size:15px;font-weight:600}
+.upload-drop p{font-size:12.5px;color:var(--muted);margin-top:6px}
+.upload-drop .btn{margin-top:16px}
+.upload-file{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid var(--t300);background:var(--t50);border-radius:var(--r-md);margin-top:14px}
+.upload-file .uf-name{flex:1;font-size:13.5px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.upload-progress{height:6px;border-radius:4px;background:var(--s200);margin-top:12px;overflow:hidden}
+.upload-progress .up-bar{height:100%;background:var(--primary);border-radius:4px;transition:width .3s}
+.upload-result{display:flex;gap:14px;margin-bottom:14px}
+.ur-box{flex:1;border-radius:var(--r-md);padding:14px;text-align:center}
+.ur-box .ur-num{font-size:22px;font-weight:700}
+.ur-box .ur-lbl{font-size:12px;margin-top:3px}
+.ur-ok{background:var(--success-bg);color:#047857}
+.ur-err{background:var(--danger-bg);color:#b91c1c}
+.ur-skip{background:var(--s100);color:var(--s600)}
+.err-row td{color:var(--danger)}
+/* 数据管理分组 */
+.dm-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.dm-cell{display:flex;align-items:center;gap:12px;padding:14px 16px}
+.dm-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dm-cell .dm-name{font-size:13.5px;font-weight:600}
+.dm-cell .dm-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.dm-cell .dm-num{margin-left:auto;font-size:20px;font-weight:700}
+/* 详情抽屉 */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
+.detail-item{padding:10px 0;border-bottom:1px solid var(--s100);display:flex;gap:14px}
+.detail-item .dk{width:130px;flex-shrink:0;font-size:12.5px;color:var(--muted)}
+.detail-item .dv{flex:1;font-size:13px;color:var(--s800);word-break:break-all}
+/* 响应式 */
+@media (max-width:1200px){
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+  .dash-grid{grid-template-columns:1fr}
+  .dash-grid2{grid-template-columns:1fr}
+  .kv-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:900px){
+  .sidebar{width:64px}
+  .side-logo .sl-name,.side-logo .sl-sub,.nav-glabel,.nav-item span,.side-user .su-name,.side-user .su-role,.side-user .su-exit{display:none}
+  .nav-item{justify-content:center;padding:10px}
+  .nav-item .n-arrow{display:none}
+  .nav-sub .nav-item{padding-left:0}
+  .side-user{justify-content:center;padding:10px}
+  .login-brand{display:none}
+  .type-cards{grid-template-columns:1fr}
+  .grade-picker{grid-template-columns:repeat(3,1fr)}
+  .wz-split{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .dm-summary{grid-template-columns:1fr}
+  .tb-search{width:200px}
+}
+@media (max-width:640px){
+  .content{padding:16px 14px 32px}
+  .stat-grid{grid-template-columns:1fr}
+  .kv-grid{grid-template-columns:1fr}
+  .grade-grid{grid-template-columns:repeat(2,1fr)}
+  .tb-search{display:none}
+  input,select,textarea{font-size:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 登录页 ===== -->
+<div id="view-login" class="active">
+  <div class="login-wrap">
+    <div class="login-brand">
+      <div class="brand-logo">
+        <div class="logo-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+        <div><div class="brand-name">浙招智达</div><div class="brand-sub">管理后台 · ADMIN</div></div>
+      </div>
+      <h1>浙江升学规划<br>一站式数据与方案管理平台</h1>
+      <p class="slogan">覆盖省属三位一体与高职提前招生的院校库、专业库、年份数据维护，以及用户学考成绩与报考方案的规划管理。</p>
+      <div class="login-stats">
+        <div class="ls"><b>47</b>高职提招院校</div>
+        <div class="ls"><b>42</b>三位一体本科高校</div>
+        <div class="ls"><b>12</b>核心数据表</div>
+      </div>
+    </div>
+    <div class="login-form">
+      <div class="lf-card">
+        <h2>登录管理后台</h2>
+        <p class="lf-sub">请使用管理员账号登录</p>
+        <div class="lf-field">
+          <label>账号</label>
+          <div class="lf-input"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><input id="login-user" value="admin@zzzd.cn" placeholder="请输入账号"></div>
+        </div>
+        <div class="lf-field">
+          <label>密码</label>
+          <div class="lf-input"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><input id="login-pass" type="password" value="123456" placeholder="请输入密码"></div>
+        </div>
+        <div class="lf-row">
+          <label><input type="checkbox" checked> 记住登录状态</label>
+          <a href="javascript:;" onclick="toast('演示原型：请联系超级管理员重置密码','info')">忘记密码？</a>
+        </div>
+        <button class="btn btn-primary btn-lg" style="width:100%" onclick="doLogin()">登 录</button>
+        <p class="lf-hint">演示环境：账号 admin@zzzd.cn / 密码 123456</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 应用外壳 ===== -->
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="side-logo">
+      <div class="logo-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+      <div><div class="sl-name">浙招智达</div><div class="sl-sub">管理后台</div></div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-user">
+      <div class="avatar">张</div>
+      <div><div class="su-name">张老师</div><div class="su-role">超级管理员</div></div>
+      <button class="su-exit" title="退出登录" onclick="doLogout()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg></button>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <div class="tb-crumb" id="tb-crumb"></div>
+      <div class="tb-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input class="input" id="global-search" placeholder="搜索用户 / 院校 / 专业…" oninput="globalSearch(this.value)">
+        <div class="tb-search-res" id="gs-res"></div>
+      </div>
+      <div class="tb-actions">
+        <button class="icon-btn bell" onclick="toast('暂无新的系统通知','info')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="dot"></span></button>
+        <button class="icon-btn" onclick="toast('帮助文档建设中','info')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4"/><path d="M12 17.5h.01"/></svg></button>
+      </div>
+      <div class="tb-user">
+        <div class="avatar">张</div>
+        <div><div class="tu-name">张老师</div><div class="tu-role">超级管理员</div></div>
+      </div>
+    </header>
+    <main class="content" id="content"></main>
+  </div>
+</div>
+
+<!-- ===== 视图容器 ===== -->
+<div id="views" style="display:none"></div>
+
+<!-- ===== 弹窗容器 ===== -->
+<div id="modal-root"></div>
+<div id="toasts"></div>
+
+<!-- something todo -->
+
+<script>
+// ICONS
+const ICONS = {
+  dash:'<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>',
+  users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  plan:'<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/>',
+  db:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 5v14c0 1.66-4 3-9 3s-9-1.34-9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/>',
+  book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+  school:'<path d="M14 22v-4a2 2 0 0 0-4 0v4"/><path d="M22 10v12M2 10v12"/><path d="M2 10l10-6 10 6-10 6z"/>',
+  upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/>',
+  download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+  edit:'<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/>',
+  trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6"/>',
+  eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  x:'<path d="M18 6L6 18M6 6l12 12"/>',
+  check:'<path d="M20 6L9 17l-5-5"/>',
+  chevD:'<path d="M6 9l6 6 6-6"/>',
+  chevL:'<path d="M15 18l-6-6 6-6"/>',
+  chevR:'<path d="M9 18l6-6-6-6"/>',
+  filter:'<path d="M22 3H2l8 9.46V19l4 2v-8.54z"/>',
+  refresh:'<path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/>',
+  phone:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  mapPin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+  calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+  alert:'<path d="M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',
+  arrowL:'<path d="M19 12H5M12 19l-7-7 7-7"/>',
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+  spark:'<path d="M12 3l1.9 5.8L19.7 10.7l-5.8 1.9L12 18.4l-1.9-5.8L4.3 10.7l5.8-1.9z"/>',
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  wallet:'<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/>',
+  shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  more:'<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  layers:'<path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>',
+  trend:'<path d="M22 7l-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
+  gavel:'<path d="M14 13l-8.5 8.5a2.12 2.12 0 0 1-3-3L11 10"/><path d="M15 5l5 5 2-2-5-5z"/><path d="M7 13l-2 2M16 2l4 4"/>',
+  award:'<circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/>',
+  calculator:'<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>',
+  checkCircle:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/>',
+  alertCircle:'<circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>',
+};
+function ic(n,s){return '<svg width="'+(s||16)+'" height="'+(s||16)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ICONS[n]+'</svg>';}
+</script>
+<script>
+/* ===================== 数据模型（示例数据） ===================== */
+const F = (k,label,type,opts,hint,extra)=>{const o={k,label,type:type||'text',hint:hint||''};if(opts)o.opts=opts;if(extra)Object.assign(o,extra);return o;};
+const TABLES = [
+  {key:'sxyxk',group:'sanyi',name:'三一院校库',desc:'省属三位一体招生本科院校基本信息',fields:[
+    F('code','院校代码','text','','按照考试院代码来确定'),F('id','唯一ID','text','','系统唯一标识'),F('name','院校名称','text','','学校唯一名称'),
+    F('level','院校层次','select',['本科']),F('nature','办学性质','select',['公办','民办','中外合作']),
+    F('category','院校分类','select',['综合类','理工类','师范类','医药类','财经类','政法类','语言类','艺术类']),
+    F('city','所属城市','text'),F('note','说明','textarea')]},
+  {key:'sxzy',group:'sanyi',name:'三一专业基本信息',desc:'三位一体招生专业及学科实力信息',fields:[
+    F('jianzhang','简章','text'),F('code','院校代码','text'),F('id','唯一ID','text'),F('school','院校名称','text'),F('mcode','专业代码','text'),
+    F('mname','专业名称','text'),F('xueke','学科评估','select',['A+','A','A-','B+','B','B-','C+','C','未参评']),
+    F('ruanke','软科评级','select',['A+','A','B+','B','B-','C+','C']),F('ruankepm','软科排名','number'),
+    F('tes','专业特色','select',['国家级一流本科专业','省级一流本科专业','特色专业','无']),
+    F('ssd','硕士点','select',['有','无']),F('bsd','博士点','select',['有','无']),F('xuezhi','学制','text'),
+    F('hz','是否中外合作','select',['是','否']),F('note','说明','textarea')]},
+  {key:'sxbm',group:'sanyi',name:'三一报名年份表',desc:'按年份维护的三位一体报名要求',year:2026,fields:[
+    F('code','院校代码','text'),F('id','唯一ID','text'),F('school','院校名称','text'),F('mcode','专业代码','text'),F('mname','专业名称','text'),
+    F('fee','学费(元/年)','number'),F('year','年份','select',['2025','2026','2027']),F('city','专业所在城市','text'),F('group','招生专业组','text'),
+    F('xk','选科要求','text'),F('zhsz','综合素质','select',['要求','不要求']),F('jianbao','是否支持兼报','select',['是','否']),
+    F('hsdesc','报名学考换算规则描述','text'),F('hsrule','报名学考换算规则','text','','如 A=10分,B=8分…'),
+    F('xd','学考等地要求','text'),F('hsfen','学考换算分要求','number'),F('dk','学考单科要求','text'),
+    F('semy','色盲色弱是否限报','select',['限报','不限报']),F('time','报名时间','text'),F('material','报名材料','textarea'),F('remark','专业备注','textarea'),F('note','说明','textarea')]},
+  {key:'sxcs',group:'sanyi',name:'三一初审年份表',desc:'按年份维护的三位一体初审数据',year:2026,fields:[
+    F('code','院校代码','text'),F('id','唯一ID','text'),F('school','院校名称','text'),F('mcode','专业代码','text'),F('mname','专业名称','text'),F('year','年份','select',['2025','2026','2027']),
+    F('plan','招生计划','number'),F('ratio','初审入围比例','text','','如 1:5'),F('minScore','初审最低入围分','number'),
+    F('poGe','初审破格条件','textarea'),F('hsdesc','初审学考换算规则描述','text'),F('hsrule','初审学考换算规则','text'),F('note','说明','textarea')]},
+  {key:'sxzc',group:'sanyi',name:'三一综测年份表',desc:'按年份维护的三位一体综合素质测试安排',year:2026,fields:[
+    F('code','院校代码','text'),F('id','唯一ID','text'),F('school','院校名称','text'),F('mcode','专业代码','text'),F('mname','专业名称','text'),F('year','年份','select',['2025','2026','2027']),
+    F('time','综测时间','text'),F('addr','综测地址','text'),F('form','综测形式','select',['笔试','面试','笔试+面试','无领导小组讨论','其他']),
+    F('desc','综测描述','textarea'),F('pay','综测缴费时间','text'),F('bd','综测报到时间','text'),F('material','综测材料','textarea'),
+    F('zkz','准考证打印时间','text'),F('resultTime','校测结果发布时间','text'),F('minScore','校测入围分','number'),F('note','说明','textarea')]},
+  {key:'sxlq',group:'sanyi',name:'三一录取年份表',desc:'按年份维护的三位一体录取数据',year:2026,fields:[
+    F('code','院校代码','text'),F('id','唯一ID','text'),F('school','院校名称','text'),F('mcode','专业代码','text'),F('mname','专业名称','text'),F('year','年份','select',['2025','2026','2027']),
+    F('gkdk','高考单科要求','text'),F('gkzf','高考总分要求','text'),F('zhdesc','综合成绩计算规则描述','text'),F('zhrule','综合成绩计算规则','text','','如 高考60%+校测30%+学考10%'),
+    F('lqhsdesc','录取学考换算规则描述','text'),F('lqhsrule','录取学考换算规则','text'),
+    F('min','录取最低总分','number'),F('avg','录取平均总分','number'),F('max','录取最高总分','number'),F('pxlq','平行志愿录取分','number'),F('note','说明','textarea')]},
+  {key:'gzyxk',group:'gaozhi',name:'高职院校库',desc:'高职提前招生院校基本信息',fields:[
+    F('code','院校代码','text','','按照考试院代码来确定'),F('id','唯一ID','text'),F('name','院校名称','text','','学校唯一名称'),
+    F('level','院校层次','select',['国家高水平学校','省高职高水平学校','其他']),F('nature','办学性质','select',['公办','民办','中外合作']),
+    F('zzsl','专升本率(%)','number'),F('jyl','就业率(%)','number'),F('city','所属城市','text'),F('note','说明','textarea')]},
+  {key:'gzyzy',group:'gaozhi',name:'高职院校专业库',desc:'高职院校开设专业信息',fields:[
+    F('code','院校代码','text'),F('id','唯一ID','text'),F('school','院校名称','text'),F('mcode','专业代码','text'),F('mname','专业名称','text'),
+    F('ddb','是否订单班','select',['是','否']),F('hz','是否中外合作','select',['是','否']),F('campus','专业所在校区','text'),F('remark','备注信息','textarea'),F('note','说明','textarea')]},
+  {key:'tzbm',group:'gaozhi',name:'提招报名年份表',desc:'按年份维护的高职提招报名要求',year:2026,fields:[
+    F('code','院校代码','text'),F('id','唯一ID','text'),F('school','院校名称','text'),F('mcode','专业代码','text'),F('mname','专业名称','text'),
+    F('xk','选科要求','text'),F('dk','学考单科要求','text'),F('zsdesc','折算科目描述','text','','如 10门'),F('zsrule','折算科目计算规则','text','','如 语数外×1.2，其余×1.0'),
+    F('hsdesc','学考换算规则描述','text'),F('hsrule','学考换算规则','text'),F('xd','学考等地要求','text'),
+    F('limit','限报专业数','number'),F('chufen','处分要求','text'),F('semy','色盲色弱是否限报','select',['限报','不限报']),
+    F('sg','身高要求','text'),F('sl','视力要求','text'),F('otherTz','其他身体条件','text'),
+    F('fee','学费(元/年)','number'),F('year','年份','select',['2025','2026','2027']),F('material','报名材料清单','textarea')]},
+  {key:'tzcs',group:'gaozhi',name:'提招初审年份表',desc:'按年份维护的高职提招初审数据',year:2026,fields:[
+    F('code','院校代码','text'),F('id','唯一ID','text'),F('school','院校名称','text'),F('mcode','专业代码','text'),F('mname','专业名称','text'),F('year','年份','select',['2025','2026','2027']),
+    F('plan','招生计划','number'),F('ratio','初审入围比例','text'),F('zsdesc','折算科目描述','text'),F('zsrule','折算科目计算规则','text'),
+    F('hsdesc','学考换算规则描述','text'),F('hsrule','学考换算规则','text'),F('minDesc','初审最低入围说明','text'),
+    F('minScore','初审最低入围分','number'),F('prob','初审入围概率(%)','number'),F('note','说明','textarea')]},
+  {key:'tzzc',group:'gaozhi',name:'提招综测年份表',desc:'按年份维护的高职提招综测安排',year:2026,fields:[
+    F('code','院校代码','text'),F('id','唯一ID','text'),F('school','院校名称','text'),F('mcode','专业代码','text'),F('mname','专业名称','text'),F('year','年份','select',['2025','2026','2027']),
+    F('time','综测时间','text'),F('addr','综测地址','text'),F('form','综测形式','select',['面试','笔试','面试+技能测试','体能测试','其他']),
+    F('desc','综测描述','textarea'),F('pay','网上缴费开始','text'),F('bd','综测报到时间','text'),F('material','综测材料','textarea'),
+    F('zkz','准考证打印时间','text'),F('remind','提醒事项','textarea'),F('resultTime','结果公布时间','text')]},
+  {key:'tzlq',group:'gaozhi',name:'提招录取年份表',desc:'按年份维护的高职提招录取数据',year:2026,fields:[
+    F('code','院校代码','text'),F('id','唯一ID','text'),F('school','院校名称','text'),F('mcode','专业代码','text'),F('mname','专业名称','text'),F('year','年份','select',['2025','2026','2027']),
+    F('zdesc','录取总分描述','text'),F('xkMan','学考折算满分','number'),F('xkRatio','学考折算比例','text','','如 50%'),
+    F('zcMan','综测满分','number'),F('zcRatio','综测折算比例','text'),F('szMan','素质特长分满分','number'),
+    F('hsdesc','学考换算规则描述','text'),F('hsrule','学考换算规则','text'),F('zsdesc','录取折算科目描述','text'),
+    F('zsrule','录取折算公式规则','text','','如 总分=学考折算×50%+综测×50%'),F('zcMin','综测最低分','number'),F('zcMax','综测最高分','number')]},
+];
+const TBL = {}; TABLES.forEach(t=>TBL[t.key]=t);
+const GROUP_NAME = {sanyi:'三位一体数据',gaozhi:'高职提招数据'};
+
+/* —— 示例数据行 —— */
+const ROWS = {
+sxyxk:[
+ {code:'0003',id:'SY0003',name:'浙江工业大学',level:'本科',nature:'公办',category:'综合类',city:'杭州',note:'浙江省属重点建设高校'},
+ {code:'0004',id:'SY0004',name:'浙江师范大学',level:'本科',nature:'公办',category:'师范类',city:'金华',note:''},
+ {code:'0005',id:'SY0005',name:'宁波大学',level:'本科',nature:'公办',category:'综合类',city:'宁波',note:'国家“双一流”建设高校'},
+ {code:'0006',id:'SY0006',name:'杭州电子科技大学',level:'本科',nature:'公办',category:'理工类',city:'杭州',note:''},
+ {code:'0007',id:'SY0007',name:'浙江理工大学',level:'本科',nature:'公办',category:'理工类',city:'杭州',note:''},
+ {code:'0008',id:'SY0008',name:'浙江工商大学',level:'本科',nature:'公办',category:'财经类',city:'杭州',note:''},
+ {code:'0015',id:'SY0015',name:'温州医科大学',level:'本科',nature:'公办',category:'医药类',city:'温州',note:''},
+ {code:'0016',id:'SY0016',name:'浙江中医药大学',level:'本科',nature:'公办',category:'医药类',city:'杭州',note:''},
+],
+sxzy:[
+ {jianzhang:'2026年三位一体招生简章',code:'0003',id:'ZY000301',school:'浙江工业大学',mcode:'000301',mname:'健行学院实验班',xueke:'A-',ruanke:'A',ruankepm:30,tes:'国家级一流本科专业',ssd:'有',bsd:'有',xuezhi:'四年',hz:'否',note:''},
+ {jianzhang:'2026年三位一体招生简章',code:'0003',id:'ZY000302',school:'浙江工业大学',mcode:'000302',mname:'计算机科学与技术',xueke:'B+',ruanke:'A',ruankepm:48,tes:'国家级一流本科专业',ssd:'有',bsd:'有',xuezhi:'四年',hz:'否',note:''},
+ {jianzhang:'2026年三位一体招生简章',code:'0005',id:'ZY000501',school:'宁波大学',mcode:'000501',mname:'法学类',xueke:'B',ruanke:'B+',ruankepm:75,tes:'省级一流本科专业',ssd:'有',bsd:'有',xuezhi:'四年',hz:'否',note:''},
+ {jianzhang:'2026年三位一体招生简章',code:'0008',id:'ZY000801',school:'浙江工商大学',mcode:'000801',mname:'工商管理类',xueke:'B+',ruanke:'A-',ruankepm:52,tes:'国家级一流本科专业',ssd:'有',bsd:'有',xuezhi:'四年',hz:'否',note:''},
+ {jianzhang:'2026年三位一体招生简章',code:'0016',id:'ZY001601',school:'浙江中医药大学',mcode:'001601',mname:'中医学',xueke:'B',ruanke:'B+',ruankepm:66,tes:'国家级一流本科专业',ssd:'有',bsd:'有',xuezhi:'五年',hz:'否',note:'五年制'},
+ {jianzhang:'2026年三位一体招生简章',code:'0004',id:'ZY000401',school:'浙江师范大学',mcode:'000401',mname:'汉语言文学（师范）',xueke:'B+',ruanke:'A-',ruankepm:41,tes:'国家级一流本科专业',ssd:'有',bsd:'有',xuezhi:'四年',hz:'否',note:''},
+],
+sxbm:[
+ {code:'0003',id:'BM000301-2026',school:'浙江工业大学',mcode:'000301',mname:'健行学院实验班',fee:5300,year:'2026',city:'杭州',group:'健行学院',xk:'不限',zhsz:'要求',jianbao:'是',hsdesc:'A=10分,B=8分,C=6分,D=4分',hsrule:'学考折算分=Σ各科换算分',xd:'A等不少于5门',hsfen:70,dk:'无',semy:'不限报',time:'2026-02-20 至 2026-03-05',material:'学考成绩单、身份证复印件、个人陈述',remark:'首年纳入三位一体招生',note:''},
+ {code:'0003',id:'BM000302-2026',school:'浙江工业大学',mcode:'000302',mname:'计算机科学与技术',fee:5300,year:'2026',city:'杭州',group:'计算机学院',xk:'物理必选',zhsz:'要求',jianbao:'是',hsdesc:'A=10分,B=8分,C=6分,D=4分',hsrule:'学考折算分=Σ各科换算分',xd:'A等不少于4门',hsfen:65,dk:'物理C等以上',semy:'不限报',time:'2026-02-20 至 2026-03-05',material:'学考成绩单、身份证复印件、个人陈述',remark:'',note:''},
+ {code:'0005',id:'BM000501-2026',school:'宁波大学',mcode:'000501',mname:'法学类',fee:5300,year:'2026',city:'宁波',group:'法学院',xk:'不限',zhsz:'要求',jianbao:'否',hsdesc:'A=15分,B=12分,C=9分,D=6分',hsrule:'学考折算分=Σ各科换算分',xd:'A等不少于6门',hsfen:85,dk:'无',semy:'不限报',time:'2026-02-25 至 2026-03-10',material:'学考成绩单、身份证复印件、个人陈述、推荐信',remark:'',note:''},
+ {code:'0008',id:'BM000801-2026',school:'浙江工商大学',mcode:'000801',mname:'工商管理类',fee:5300,year:'2026',city:'杭州',group:'工商管理学院',xk:'不限',zhsz:'要求',jianbao:'是',hsdesc:'A=10分,B=8分,C=6分,D=4分',hsrule:'学考折算分=Σ各科换算分',xd:'A等不少于5门',hsfen:70,dk:'数学C等以上',semy:'不限报',time:'2026-02-20 至 2026-03-08',material:'学考成绩单、身份证复印件、个人陈述',remark:'',note:''},
+],
+sxcs:[
+ {code:'0003',id:'CS000301-2026',school:'浙江工业大学',mcode:'000301',mname:'健行学院实验班',year:'2026',plan:120,ratio:'1:5',minScore:82,poGe:'学科竞赛省一等奖及以上可破格入围',hsdesc:'A=10分,B=8分,C=6分,D=4分',hsrule:'学考折算分=Σ各科换算分',note:''},
+ {code:'0003',id:'CS000302-2026',school:'浙江工业大学',mcode:'000302',mname:'计算机科学与技术',year:'2026',plan:60,ratio:'1:4',minScore:78,poGe:'信息学竞赛省一等奖可破格',hsdesc:'A=10分,B=8分,C=6分,D=4分',hsrule:'学考折算分=Σ各科换算分',note:''},
+ {code:'0005',id:'CS000501-2026',school:'宁波大学',mcode:'000501',mname:'法学类',year:'2026',plan:45,ratio:'1:5',minScore:85,poGe:'无',hsdesc:'A=15分,B=12分,C=9分,D=6分',hsrule:'学考折算分=Σ各科换算分',note:''},
+ {code:'0008',id:'CS000801-2026',school:'浙江工商大学',mcode:'000801',mname:'工商管理类',year:'2026',plan:100,ratio:'1:5',minScore:80,poGe:'无',hsdesc:'A=10分,B=8分,C=6分,D=4分',hsrule:'学考折算分=Σ各科换算分',note:''},
+],
+sxzc:[
+ {code:'0003',id:'ZC000301-2026',school:'浙江工业大学',mcode:'000301',mname:'健行学院实验班',year:'2026',time:'2026-04-13',addr:'浙江工业大学朝晖校区',form:'笔试+面试',desc:'笔试考察综合能力，面试为无领导小组讨论',pay:'2026-04-05 前',bd:'2026-04-12',material:'身份证、准考证',zkz:'2026-04-08 起',resultTime:'2026-04-20',minScore:80,note:''},
+ {code:'0003',id:'ZC000302-2026',school:'浙江工业大学',mcode:'000302',mname:'计算机科学与技术',year:'2026',time:'2026-04-13',addr:'浙江工业大学屏峰校区',form:'笔试+面试',desc:'笔试考察数学与逻辑',pay:'2026-04-05 前',bd:'2026-04-12',material:'身份证、准考证',zkz:'2026-04-08 起',resultTime:'2026-04-20',minScore:76,note:''},
+ {code:'0005',id:'ZC000501-2026',school:'宁波大学',mcode:'000501',mname:'法学类',year:'2026',time:'2026-04-18',addr:'宁波大学本部校区',form:'面试',desc:'结构化面试',pay:'2026-04-10 前',bd:'2026-04-17',material:'身份证、准考证、个人陈述原件',zkz:'2026-04-12 起',resultTime:'2026-04-25',minScore:78,note:''},
+],
+sxlq:[
+ {code:'0003',id:'LQ000301-2026',school:'浙江工业大学',mcode:'000301',mname:'健行学院实验班',year:'2026',gkdk:'无',gkzf:'高考总分不低于特控线',zhdesc:'高考成绩×60% + 校测成绩×30% + 学考折算×10%',zhrule:'综合成绩=0.6×高考+0.3×校测+0.1×学考折算',lqhsdesc:'A=10分,B=8分,C=6分,D=4分',lqhsrule:'学考折算分=Σ各科换算分',min:82.5,avg:85.1,max:92.3,pxlq:618,note:''},
+ {code:'0003',id:'LQ000302-2026',school:'浙江工业大学',mcode:'000302',mname:'计算机科学与技术',year:'2026',gkdk:'无',gkzf:'高考总分不低于特控线',zhdesc:'高考成绩×60% + 校测成绩×30% + 学考折算×10%',zhrule:'综合成绩=0.6×高考+0.3×校测+0.1×学考折算',lqhsdesc:'A=10分,B=8分,C=6分,D=4分',lqhsrule:'学考折算分=Σ各科换算分',min:79.8,avg:82.4,max:90.1,pxlq:612,note:''},
+ {code:'0005',id:'LQ000501-2026',school:'宁波大学',mcode:'000501',mname:'法学类',year:'2026',gkdk:'无',gkzf:'高考总分不低于特控线',zhdesc:'高考成绩×55% + 校测成绩×30% + 学考折算×15%',zhrule:'综合成绩=0.55×高考+0.3×校测+0.15×学考折算',lqhsdesc:'A=15分,B=12分,C=9分,D=6分',lqhsrule:'学考折算分=Σ各科换算分',min:84.6,avg:86.9,max:93.0,pxlq:620,note:''},
+],
+gzyxk:[
+ {code:'0001',id:'GZ0001',name:'金华职业技术大学',level:'国家高水平学校',nature:'公办',zzsl:22,jyl:98,city:'金华',note:'国家“双高”建设院校'},
+ {code:'0002',id:'GZ0002',name:'宁波职业技术大学',level:'国家高水平学校',nature:'公办',zzsl:20,jyl:97,city:'宁波',note:''},
+ {code:'0003',id:'GZ0003',name:'浙江机电职业技术大学',level:'国家高水平学校',nature:'公办',zzsl:19,jyl:98,city:'杭州',note:''},
+ {code:'0004',id:'GZ0004',name:'温州职业技术学院',level:'省高职高水平学校',nature:'公办',zzsl:18,jyl:96,city:'温州',note:''},
+ {code:'0005',id:'GZ0005',name:'杭州职业技术大学',level:'国家高水平学校',nature:'公办',zzsl:21,jyl:97,city:'杭州',note:''},
+ {code:'0006',id:'GZ0006',name:'浙江金融职业学院',level:'省高职高水平学校',nature:'公办',zzsl:17,jyl:96,city:'杭州',note:''},
+ {code:'0052',id:'GZ0052',name:'杭州科技职业技术学院',level:'省高职高水平学校',nature:'公办',zzsl:15,jyl:95,city:'杭州',note:''},
+],
+gzyzy:[
+ {code:'0001',id:'GZY000101',school:'金华职业技术大学',mcode:'0101',mname:'护理',ddb:'否',hz:'否',campus:'医学院校区',remark:'省级特色专业',note:''},
+ {code:'0001',id:'GZY000102',school:'金华职业技术大学',mcode:'0102',mname:'学前教育',ddb:'否',hz:'否',campus:'师范学院校区',remark:'',note:''},
+ {code:'0002',id:'GZY000201',school:'宁波职业技术大学',mcode:'0201',mname:'机电一体化技术',ddb:'是',hz:'否',campus:'联盟园区',remark:'与海天集团订单班',note:''},
+ {code:'0003',id:'GZY000301',school:'浙江机电职业技术大学',mcode:'0301',mname:'数控技术',ddb:'是',hz:'否',campus:'滨江校区',remark:'与省内装备制造企业合作',note:''},
+ {code:'0005',id:'GZY000501',school:'杭州职业技术大学',mcode:'0501',mname:'电子商务',ddb:'否',hz:'是',campus:'本部校区',remark:'',note:''},
+ {code:'0006',id:'GZY000601',school:'浙江金融职业学院',mcode:'0601',mname:'金融科技应用',ddb:'否',hz:'否',campus:'钱塘校区',remark:'',note:''},
+],
+tzbm:[
+ {code:'0001',id:'TZBM000101-2026',school:'金华职业技术大学',mcode:'0101',mname:'护理',xk:'不限',dk:'语数外C等及以上',zsdesc:'10门科目',zsrule:'语数外×1.2，其余×1.0',hsdesc:'A=90分,B=80分,C=70分,D=60分',hsrule:'学考折算分=Σ(单科换算分×权重)',xd:'5C及以上',limit:5,chufen:'无',semy:'限报',sg:'女生155cm以上',sl:'矫正视力4.8以上',otherTz:'无色盲',fee:6000,year:'2026',material:'学考成绩单、身份证、体检表'},
+ {code:'0001',id:'TZBM000102-2026',school:'金华职业技术大学',mcode:'0102',mname:'学前教育',xk:'不限',dk:'语数外C等及以上',zsdesc:'10门科目',zsrule:'语数外×1.2，其余×1.0',hsdesc:'A=90分,B=80分,C=70分,D=60分',hsrule:'学考折算分=Σ(单科换算分×权重)',xd:'5C及以上',limit:5,chufen:'无',semy:'不限报',sg:'',sl:'',otherTz:'',fee:6000,year:'2026',material:'学考成绩单、身份证、体检表'},
+ {code:'0002',id:'TZBM000201-2026',school:'宁波职业技术大学',mcode:'0201',mname:'机电一体化技术',xk:'物理或技术选考',dk:'数学C等及以上',zsdesc:'10门科目',zsrule:'语数外×1.2，其余×1.0',hsdesc:'A=90分,B=80分,C=70分,D=60分',hsrule:'学考折算分=Σ(单科换算分×权重)',xd:'4C及以上',limit:4,chufen:'无',semy:'不限报',sg:'',sl:'',otherTz:'',fee:6600,year:'2026',material:'学考成绩单、身份证、体检表'},
+ {code:'0003',id:'TZBM000301-2026',school:'浙江机电职业技术大学',mcode:'0301',mname:'数控技术',xk:'物理或技术选考',dk:'数学C等及以上',zsdesc:'10门科目',zsrule:'语数外×1.2，其余×1.0',hsdesc:'A=90分,B=80分,C=70分,D=60分',hsrule:'学考折算分=Σ(单科换算分×权重)',xd:'4C及以上',limit:4,chufen:'无',semy:'不限报',sg:'',sl:'',otherTz:'',fee:6600,year:'2026',material:'学考成绩单、身份证、体检表'},
+ {code:'0006',id:'TZBM000601-2026',school:'浙江金融职业学院',mcode:'0601',mname:'金融科技应用',xk:'不限',dk:'语数外C等及以上',zsdesc:'10门科目',zsrule:'语数外×1.2，其余×1.0',hsdesc:'A=90分,B=80分,C=70分,D=60分',hsrule:'学考折算分=Σ(单科换算分×权重)',xd:'5C及以上',limit:6,chufen:'无',semy:'不限报',sg:'',sl:'',otherTz:'',fee:5800,year:'2026',material:'学考成绩单、身份证、体检表'},
+],
+tzcs:[
+ {code:'0001',id:'TZCS000101-2026',school:'金华职业技术大学',mcode:'0101',mname:'护理',year:'2026',plan:120,ratio:'1:3',zsdesc:'10门科目',zsrule:'语数外×1.2，其余×1.0',hsdesc:'A=90分,B=80分,C=70分,D=60分',hsrule:'学考折算分=Σ(单科换算分×权重)',minDesc:'按学考折算分从高到低排序',minScore:76,prob:33,note:''},
+ {code:'0002',id:'TZCS000201-2026',school:'宁波职业技术大学',mcode:'0201',mname:'机电一体化技术',year:'2026',plan:80,ratio:'1:4',zsdesc:'10门科目',zsrule:'语数外×1.2，其余×1.0',hsdesc:'A=90分,B=80分,C=70分,D=60分',hsrule:'学考折算分=Σ(单科换算分×权重)',minDesc:'按学考折算分从高到低排序',minScore:72,prob:25,note:''},
+ {code:'0006',id:'TZCS000601-2026',school:'浙江金融职业学院',mcode:'0601',mname:'金融科技应用',year:'2026',plan:60,ratio:'1:5',zsdesc:'10门科目',zsrule:'语数外×1.2，其余×1.0',hsdesc:'A=90分,B=80分,C=70分,D=60分',hsrule:'学考折算分=Σ(单科换算分×权重)',minDesc:'按学考折算分从高到低排序',minScore:70,prob:20,note:''},
+],
+tzzc:[
+ {code:'0001',id:'TZZC000101-2026',school:'金华职业技术大学',mcode:'0101',mname:'护理',year:'2026',time:'2026-04-19',addr:'金华职业技术大学医学院',form:'面试+技能测试',desc:'含护理技能操作考核',pay:'2026-04-10 起',bd:'2026-04-18',material:'身份证、准考证',zkz:'2026-04-15 起',remind:'需自备护士服',resultTime:'2026-04-25'},
+ {code:'0002',id:'TZZC000201-2026',school:'宁波职业技术大学',mcode:'0201',mname:'机电一体化技术',year:'2026',time:'2026-04-20',addr:'宁波职业技术大学联盟园区',form:'面试',desc:'结构化面试',pay:'2026-04-11 起',bd:'2026-04-19',material:'身份证、准考证',zkz:'2026-04-16 起',remind:'',resultTime:'2026-04-26'},
+ {code:'0006',id:'TZZC000601-2026',school:'浙江金融职业学院',mcode:'0601',mname:'金融科技应用',year:'2026',time:'2026-04-22',addr:'浙江金融职业学院钱塘校区',form:'面试',desc:'结构化面试',pay:'2026-04-12 起',bd:'2026-04-21',material:'身份证、准考证',zkz:'2026-04-17 起',remind:'',resultTime:'2026-04-28'},
+],
+tzlq:[
+ {code:'0001',id:'TZLQ000101-2026',school:'金华职业技术大学',mcode:'0101',mname:'护理',year:'2026',zdesc:'学考折算分 + 综测成绩',xkMan:100,xkRatio:'50%',zcMan:100,zcRatio:'50%',szMan:10,hsdesc:'A=90分,B=80分,C=70分,D=60分',hsrule:'学考折算分=Σ(单科换算分×权重)',zsdesc:'10门科目',zsrule:'总分=学考折算×50% + 综测×50% + 素质特长加分',zcMin:68,zcMax:96},
+ {code:'0002',id:'TZLQ000201-2026',school:'宁波职业技术大学',mcode:'0201',mname:'机电一体化技术',year:'2026',zdesc:'学考折算分 + 综测成绩',xkMan:100,xkRatio:'50%',zcMan:100,zcRatio:'50%',szMan:10,hsdesc:'A=90分,B=80分,C=70分,D=60分',hsrule:'学考折算分=Σ(单科换算分×权重)',zsdesc:'10门科目',zsrule:'总分=学考折算×50% + 综测×50% + 素质特长加分',zcMin:65,zcMax:92},
+ {code:'0006',id:'TZLQ000601-2026',school:'浙江金融职业学院',mcode:'0601',mname:'金融科技应用',year:'2026',zdesc:'学考折算分 + 综测成绩',xkMan:100,xkRatio:'50%',zcMan:100,zcRatio:'50%',szMan:10,hsdesc:'A=90分,B=80分,C=70分,D=60分',hsrule:'学考折算分=Σ(单科换算分×权重)',zsdesc:'10门科目',zsrule:'总分=学考折算×50% + 综测×50% + 素质特长加分',zcMin:62,zcMax:90},
+],
+};
+
+/* —— 用户与方案（示例数据） —— */
+const SUBJECTS = ['语文','数学','外语','物理','化学','生物','政治','历史','地理','技术'];
+const USERS = [
+ {id:'U0001',uid:'1023145789',name:'张三',nick:'多先生',phone:'138****5789',gender:'男',birth:'2008-06-15',district:'杭州上城区',year:'2026',types:['省属三位一体'],school:'学军中学西溪校区',cls:'高三(2)班',teacher:'张老师',subjects:['物理','化学','生物'],foreign:'英语',
+  grades:{语文:'A',数学:'A',外语:'B',物理:'A',化学:'A',生物:'A',政治:'B',历史:'A',地理:'A',技术:'A'},
+  estScore:610,firstScore:385,m1:598,m2:602,m3:615,zhsz:{品德表现:'A',学业水平:'A',运动健康:'B',创新实践:'A',艺术素养:'B'},
+  talent:'编程与数学建模，获省青少年科技创新大赛二等奖',wantRegion:['杭州','宁波'],notRegion:['舟山','丽水'],wantSchool:['浙江工业大学','温州商学院'],notSchool:[],wantMajor:['计算机','土木工程'],notMajor:['临床医学'],nature:'公办',height:'175CM',weight:'80KG',
+  status:'正常',regTime:'2026-05-12',planCount:1},
+ {id:'U0002',uid:'1023145790',name:'李思远',nick:'',phone:'139****2210',gender:'男',birth:'2008-03-22',district:'杭州萧山区',year:'2026',types:['高职提前招生'],school:'杭州职业技术大学附属中学',cls:'高三(1)班',teacher:'陈老师',subjects:['政治','历史','地理'],foreign:'日语',
+  grades:{语文:'B',数学:'C',外语:'B',物理:'C',化学:'C',生物:'B',政治:'A',历史:'A',地理:'A',技术:'B'},
+  estScore:0,firstScore:0,m1:0,m2:0,m3:0,zhsz:{品德表现:'A',学业水平:'B',运动健康:'B',创新实践:'C',艺术素养:'B'},
+  talent:'校篮球队主力',wantRegion:['杭州'],notRegion:[],wantSchool:['杭州职业技术大学'],notSchool:[],wantMajor:['电子商务'],notMajor:[],nature:'公办',height:'182CM',weight:'75KG',
+  status:'正常',regTime:'2026-06-02',planCount:1},
+ {id:'U0003',uid:'1023145791',name:'王语桐',nick:'桐桐',phone:'137****8831',gender:'女',birth:'2009-01-08',district:'宁波海曙区',year:'2027',types:['省属三位一体','高职提前招生'],school:'宁波效实中学',cls:'高二(5)班',teacher:'张老师',subjects:['物理','化学','技术'],foreign:'英语',
+  grades:{语文:'A',数学:'A',外语:'A',物理:'B',化学:'A',生物:'B',政治:'A',历史:'A',地理:'B',技术:'A'},
+  estScore:0,firstScore:0,m1:0,m2:0,m3:0,zhsz:{品德表现:'A',学业水平:'A',运动健康:'A',创新实践:'B',艺术素养:'A'},
+  talent:'古筝十级',wantRegion:['杭州','宁波'],notRegion:[],wantSchool:['浙江工业大学'],notSchool:[],wantMajor:['自动化'],notMajor:[],nature:'公办',height:'163CM',weight:'50KG',
+  status:'正常',regTime:'2026-08-15',planCount:1},
+ {id:'U0004',uid:'1023145792',name:'陈浩',nick:'',phone:'136****4472',gender:'男',birth:'2008-11-30',district:'温州鹿城区',year:'2026',types:['普通高考'],school:'温州中学',cls:'高三(6)班',teacher:'陈老师',subjects:['化学','生物','政治'],foreign:'英语',
+  grades:{语文:'B',数学:'B',外语:'B',物理:'C',化学:'A',生物:'A',政治:'A',历史:'B',地理:'B',技术:'C'},
+  estScore:588,firstScore:0,m1:572,m2:580,m3:591,zhsz:{品德表现:'B',学业水平:'B',运动健康:'A',创新实践:'B',艺术素养:'C'},
+  talent:'',wantRegion:['温州','杭州'],notRegion:[],wantSchool:[],notSchool:[],wantMajor:['临床医学'],notMajor:[],nature:'不限',height:'170CM',weight:'62KG',
+  status:'正常',regTime:'2026-03-20',planCount:0},
+ {id:'U0005',uid:'1023145793',name:'赵敏',nick:'敏敏',phone:'135****9916',gender:'女',birth:'2009-05-17',district:'嘉兴南湖区',year:'2027',types:['省属三位一体'],school:'嘉兴一中',cls:'高二(3)班',teacher:'张老师',subjects:['政治','历史','地理'],foreign:'英语',
+  grades:{语文:'A',数学:'B',外语:'A',物理:'C',化学:'B',生物:'A',政治:'A',历史:'A',地理:'A',技术:'B'},
+  estScore:0,firstScore:0,m1:0,m2:0,m3:0,zhsz:{品德表现:'A',学业水平:'A',运动健康:'B',创新实践:'A',艺术素养:'A'},
+  talent:'校广播站站长',wantRegion:['杭州'],notRegion:['丽水'],wantSchool:['浙江师范大学'],notSchool:[],wantMajor:['汉语言文学'],notMajor:[],nature:'公办',height:'160CM',weight:'48KG',
+  status:'正常',regTime:'2026-09-01',planCount:0},
+ {id:'U0006',uid:'1023145794',name:'周子航',nick:'',phone:'134****7720',gender:'男',birth:'2008-07-25',district:'金华婺城区',year:'2026',types:['高职提前招生'],school:'金华一中',cls:'高三(4)班',teacher:'陈老师',subjects:['物理','化学','地理'],foreign:'英语',
+  grades:{语文:'B',数学:'B',外语:'C',物理:'A',化学:'B',生物:'C',政治:'B',历史:'B',地理:'A',技术:'B'},
+  estScore:0,firstScore:0,m1:0,m2:0,m3:0,zhsz:{品德表现:'B',学业水平:'B',运动健康:'A',创新实践:'B',艺术素养:'C'},
+  talent:'电子制作爱好者',wantRegion:['金华','杭州'],notRegion:[],wantSchool:['金华职业技术大学'],notSchool:[],wantMajor:['机电一体化'],notMajor:[],nature:'公办',height:'176CM',weight:'70KG',
+  status:'正常',regTime:'2026-07-08',planCount:0},
+ {id:'U0007',uid:'1023145795',name:'吴佳怡',nick:'',phone:'133****3358',gender:'女',birth:'2008-09-12',district:'湖州吴兴区',year:'2026',types:['省属三位一体'],school:'湖州中学',cls:'高三(1)班',teacher:'张老师',subjects:['物理','化学','生物'],foreign:'英语',
+  grades:{语文:'A',数学:'A',外语:'A',物理:'A',化学:'A',生物:'B',政治:'B',历史:'A',地理:'B',技术:'A'},
+  estScore:605,firstScore:378,m1:590,m2:600,m3:608,zhsz:{品德表现:'A',学业水平:'A',运动健康:'A',创新实践:'B',艺术素养:'B'},
+  talent:'全国生物奥赛省二等奖',wantRegion:['杭州'],notRegion:['舟山'],wantSchool:['浙江工业大学','浙江中医药大学'],notSchool:[],wantMajor:['生物工程','中医学'],notMajor:[],nature:'公办',height:'158CM',weight:'45KG',
+  status:'正常',regTime:'2026-04-18',planCount:0},
+ {id:'U0008',uid:'1023145796',name:'郑博文',nick:'',phone:'132****6693',gender:'男',birth:'2009-02-03',district:'台州椒江区',year:'2027',types:['高职提前招生'],school:'台州中学',cls:'高二(7)班',teacher:'陈老师',subjects:['物理','化学','技术'],foreign:'英语',
+  grades:{语文:'B',数学:'C',外语:'C',物理:'B',化学:'B',生物:'C',政治:'B',历史:'B',地理:'B',技术:'A'},
+  estScore:0,firstScore:0,m1:0,m2:0,m3:0,zhsz:{品德表现:'B',学业水平:'C',运动健康:'A',创新实践:'A',艺术素养:'B'},
+  talent:'无人机航拍',wantRegion:['杭州','宁波'],notRegion:[],wantSchool:['浙江机电职业技术大学'],notSchool:[],wantMajor:['数控技术'],notMajor:[],nature:'公办',height:'174CM',weight:'66KG',
+  status:'正常',regTime:'2026-09-05',planCount:1},
+];
+const PLANS = [
+ {id:'P0001',uid:'U0001',userName:'张三',name:'三位一体方案 · 2026',type:'sanyi',year:'2026',status:'confirmed',src:'planner',creator:'张老师',createdAt:'2026-05-20 14:32',updatedAt:'2026-05-21 09:10',items:[
+   {risk:'chong',school:'浙江工业大学',major:'健行学院实验班',score:86.2,metrics:['初审入围分 82','录取最低 82.5']},
+   {risk:'chong',school:'浙江工业大学',major:'计算机科学与技术',score:84.5,metrics:['初审入围分 78','录取最低 79.8']},
+   {risk:'wen',school:'浙江工商大学',major:'工商管理类',score:82.1,metrics:['初审入围分 80','录取最低 81.0']},
+   {risk:'bao',school:'温州商学院',major:'金融学',score:74.8,metrics:['初审入围分 70','录取最低 72.0']},
+ ]},
+ {id:'P0002',uid:'U0002',userName:'李思远',name:'高职提招方案 · 2026',type:'gaozhi',year:'2026',status:'draft',src:'planner',creator:'陈老师',createdAt:'2026-06-10 10:15',updatedAt:'2026-06-10 10:15',items:[
+   {risk:'wen',school:'杭州职业技术大学',major:'电子商务',score:82.0,metrics:['初审入围分 74','综测最低 64']},
+   {risk:'bao',school:'浙江商业职业技术学院',major:'电子商务',score:76.5,metrics:['初审入围分 68','综测最低 60']},
+ ]},
+ {id:'P0003',uid:'U0003',userName:'王语桐',name:'三位一体方案 · 2027',type:'sanyi',year:'2027',status:'generated',src:'planner',creator:'张老师',createdAt:'2026-09-10 16:40',updatedAt:'2026-09-10 16:40',items:[
+   {risk:'chong',school:'浙江工业大学',major:'自动化',score:85.0,metrics:['待发布数据','参考2026年']},
+   {risk:'wen',school:'宁波大学',major:'电子信息类',score:82.4,metrics:['待发布数据','参考2026年']},
+   {risk:'bao',school:'浙江科技大学',major:'机械类',score:76.0,metrics:['待发布数据','参考2026年']},
+ ]},
+ {id:'P0004',uid:'U0008',userName:'郑博文',name:'高职提招方案 · 2027',type:'gaozhi',year:'2027',status:'draft',src:'planner',creator:'陈老师',createdAt:'2026-09-12 11:20',updatedAt:'2026-09-12 11:20',items:[
+   {risk:'chong',school:'浙江机电职业技术大学',major:'数控技术',score:80.5,metrics:['待发布数据','参考2026年']},
+   {risk:'bao',school:'宁波职业技术大学',major:'机电一体化技术',score:75.0,metrics:['待发布数据','参考2026年']},
+ ]},
+ {id:'P0005',uid:'U0001',userName:'张三',name:'三位一体自选方案 · 2026',type:'sanyi',year:'2026',status:'generated',src:'student',creator:'张三',createdAt:'2026-09-15 20:05',updatedAt:'',items:[
+   {risk:'chong',school:'宁波大学',major:'法学类',score:92.0,metrics:['初审入围分 85','录取最低 84.6']},
+   {risk:'wen',school:'浙江工业大学',major:'健行学院实验班',score:86.2,metrics:['初审入围分 82','录取最低 82.5']},
+   {risk:'bao',school:'温州商学院',major:'金融学',score:74.8,metrics:['初审入围分 70','录取最低 72.0']},
+ ]},
+ {id:'P0006',uid:'U0002',userName:'李思远',name:'高职提招自选方案 · 2026',type:'gaozhi',year:'2026',status:'draft',src:'student',creator:'李思远',createdAt:'2026-09-18 19:30',updatedAt:'',items:[
+   {risk:'wen',school:'浙江旅游职业学院',major:'酒店管理与数字化运营',score:81.0,metrics:['初审入围分 72','综测最低 62']},
+   {risk:'bao',school:'杭州科技职业技术学院',major:'商务英语',score:74.0,metrics:['初审入围分 66','综测最低 58']},
+ ]},
+];
+function userById(id){return USERS.find(u=>u.id===id);}
+function plansOf(uid){return PLANS.filter(p=>p.uid===uid);}
+const PLAN_STATUS = {draft:{label:'草稿',cls:'tag-gray'},generated:{label:'已生成',cls:'tag-blue'},confirmed:{label:'已确认',cls:'tag-green'}};
+const RISK_NAME = {chong:'冲',wen:'稳',bao:'保'};
+const RISK_CLS = {chong:'risk-chong',wen:'risk-wen',bao:'risk-bao'};
+</script>
+<script>
+/* ===================== 核心框架 ===================== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(msg,type){
+  const t=document.createElement('div');t.className='toast '+(type||'success');
+  const ico=type==='error'?'alert':(type==='info'?'info':'check');
+  t.innerHTML='<span class="t-ico">'+ic(ico,15)+'</span><span>'+esc(msg)+'</span>';
+  $('#toasts').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},2600);
+}
+let MODAL_OK=null;
+function openModal(html,size){
+  const root=$('#modal-root');
+  root.innerHTML='<div class="modal-mask open"><div class="modal '+(size||'')+'">'+html+'</div></div>';
+  root.querySelector('.modal-mask').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+}
+function closeModal(){$('#modal-root').innerHTML='';}
+function confirmModal(opts){
+  openModal('<div class="modal-head"><h3>'+esc(opts.title||'操作确认')+'</h3><button class="icon-btn" onclick="closeModal()">'+ic('x',16)+'</button></div>'
+   +'<div class="modal-body"><p style="font-size:14px;color:var(--s700);line-height:1.7">'+opts.message+'</p></div>'
+   +'<div class="modal-foot"><button class="btn" onclick="closeModal()">取消</button><button class="btn '+(opts.danger?'btn-danger':'btn-primary')+'" id="cf-ok">'+esc(opts.okText||'确定')+'</button></div>','');
+  $('#cf-ok').onclick=()=>{closeModal();opts.onOk&&opts.onOk();};
+}
+/* —— 导航 —— */
+const NAV=[
+ {type:'group',label:'概览',items:[{key:'dashboard',name:'工作台',icon:'dash',route:'#/dashboard'}]},
+ {type:'group',label:'用户与方案',items:[
+   {key:'users',name:'用户管理',icon:'users',route:'#/users'},
+   {key:'plan',name:'方案规划',icon:'plan',route:'#/plan'}]},
+ {type:'subgroup',label:'数据管理',key:'sg-data',
+   groups:[
+    {key:'sanyi',name:'三位一体数据',icon:'book',items:TABLES.filter(t=>t.group==='sanyi').map(t=>({key:'data-'+t.key,name:t.name,route:'#/data/'+t.key}))},
+    {key:'gaozhi',name:'高职提招数据',icon:'school',items:TABLES.filter(t=>t.group==='gaozhi').map(t=>({key:'data-'+t.key,name:t.name,route:'#/data/'+t.key}))}
+   ]},
+];
+function renderNav(){
+  let h='';
+  NAV.forEach(g=>{
+    if(g.type==='group'){
+      h+='<div class="nav-group"><div class="nav-glabel">'+g.label+'</div>';
+      g.items.forEach(it=>{h+='<div class="nav-item" data-nav="'+it.key+'" onclick="navTo(\''+it.route+'\')">'+ic(it.icon,17)+'<span>'+it.name+'</span></div>';});
+      h+='</div>';
+    }else{
+      h+='<div class="nav-group"><div class="nav-glabel">'+g.label+'</div>';
+      g.groups.forEach(sg=>{
+        h+='<div class="nav-item sg-head" data-nav="'+sg.key+'" onclick="toggleSub(\''+sg.key+'\')">'+ic(sg.icon,17)+'<span>'+sg.name+'</span><span class="n-arrow">'+ic('chevD',13)+'</span></div>';
+        h+='<div class="nav-sub" id="sub-'+sg.key+'">';
+        sg.items.forEach(it=>{h+='<div class="nav-item" data-nav="'+it.key+'" onclick="navTo(\''+it.route+'\')"><span>'+it.name+'</span></div>';});
+        h+='</div>';
+      });
+      h+='</div>';
+    }
+  });
+  $('#nav').innerHTML=h;
+}
+function toggleSub(key){const s=$('#sub-'+key);s.classList.toggle('open');$('[data-nav="'+key+'"]').classList.toggle('open');}
+function setActiveNav(keys){
+  document.querySelectorAll('#nav .nav-item').forEach(n=>n.classList.remove('active'));
+  keys.forEach(k=>{const el=document.querySelector('[data-nav="'+k+'"]');if(el){el.classList.add('active');
+    const sub=el.closest('.nav-sub');if(sub){sub.classList.add('open');const head=sub.previousElementSibling;if(head)head.classList.add('open');}}});
+}
+/* —— 路由 —— */
+function parseHash(){
+  const raw=location.hash.replace(/^#\/?/,'');
+  const parts=raw.split('?')[0].split('/');
+  return {name:parts[0],arg:parts[1],arg2:parts[2]};
+}
+function navTo(route){location.hash=route;}
+window.addEventListener('hashchange',router);
+function router(){
+  const r=parseHash();
+  const view=document.querySelector('#view-login');
+  const app=$('#app');
+  if(r.name==='login'||!app.classList.contains('active')){view.classList.add('active');app.classList.remove('active');return;}
+  view.classList.remove('active');app.classList.add('active');
+  const c=$('#content');
+  let html='',crumb=[];
+  switch(r.name){
+    case 'dashboard': html=vDashboard();crumb=[{t:'工作台'}];break;
+    case 'users': html=vUsers();crumb=[{t:'用户管理'}];break;
+    case 'user': html=vUserDetail(r.arg);crumb=[{t:'用户管理',l:'#/users'},{t:userById(r.arg)?userById(r.arg).name:'用户详情'}];break;
+    case 'plan': html=vPlan();crumb=[{t:'方案规划'}];break;
+    case 'data': html=vData(r.arg);{const t=TBL[r.arg];crumb=[{t:'数据管理'},{t:t?GROUP_NAME[t.group]:''},{t:t?t.name:'数据表'}];}break;
+    default: html=vDashboard();crumb=[{t:'工作台'}];
+  }
+  c.innerHTML=html;
+  renderCrumb(crumb);
+  setActiveNav(navKeysFor(r));
+  afterRender(r);
+}
+function navKeysFor(r){
+  if(r.name==='dashboard')return ['dashboard'];
+  if(r.name==='users')return ['users'];
+  if(r.name==='user')return ['users'];
+  if(r.name==='plan')return ['plan'];
+  if(r.name==='data'){const t=TBL[r.arg];return t?['sg-data',t.group,'data-'+t.key]:['sg-data'];}
+  return [];
+}
+function renderCrumb(items){
+  $('#tb-crumb').innerHTML=items.map((c,i)=>i<items.length-1?(c.l?'<a href="'+c.l+'">'+c.t+'</a>':'<span>'+c.t+'</span>')+'<span class="sep">/</span>':'<b>'+c.t+'</b>').join('');
+}
+function afterRender(r){
+  if(r.name==='dashboard')initDashCharts();
+  if(r.name==='user')initUserTabs(r.arg);
+}
+/* —— 登录 / 退出 —— */
+function doLogin(){
+  const u=$('#login-user').value.trim(),p=$('#login-pass').value;
+  if(!u||!p){toast('请输入账号和密码','error');return;}
+  $('#view-login').classList.remove('active');$('#app').classList.add('active');
+  if(!location.hash||location.hash==='#/login')location.hash='#/dashboard';else router();
+  toast('欢迎回来，张老师');
+}
+function doLogout(){confirmModal({title:'退出登录',message:'确定要退出当前管理员账号吗？',okText:'退出',onOk:()=>{location.hash='#/login';}});}
+/* —— 全局搜索 —— */
+function globalSearch(v){
+  const box=$('#gs-res');
+  if(!v.trim()){box.classList.remove('open');return;}
+  const res=[];
+  USERS.filter(u=>u.name.includes(v)||u.uid.includes(v)||u.phone.includes(v)).forEach(u=>res.push({t:'用户 · '+u.name,sub:u.school+' / '+u.types.join('、'),act:()=>navTo('#/user/'+u.id)}));
+  TABLES.forEach(t=>{
+    const tbl=ROWS[t.key];
+    for(let i=0;i<tbl.length&&res.length<9;i++){
+      const row=tbl[i];
+      if((row.school||row.name||'').includes(v)||(row.mname||'').includes(v)){
+        res.push({t:'['+t.name+'] '+(row.school||row.name),sub:(row.mname||row.code||row.id),act:()=>{navTo('#/data/'+t.key);setTimeout(()=>toast('已定位到数据表：'+t.name,'info'),100);}});
+        break;
+      }
+    }
+  });
+  if(!res.length)box.innerHTML='<div class="sr-item" style="color:var(--muted)">未找到相关结果</div>';
+  else box.innerHTML=res.slice(0,8).map(r=>'<div class="sr-item" onclick="gsGo(this)">'+ic('search',14)+'<div style="flex:1;min-width:0"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.t)+'</div><div style="font-size:11px;color:var(--muted)">'+esc(r.sub)+'</div></div></div>').join('');
+  window._gsRes=res;
+  box.classList.add('open');
+}
+function gsGo(el){
+  const idx=[...el.parentNode.children].indexOf(el);
+  const r=(window._gsRes||[])[idx];
+  if(r){r.act();$('#global-search').value='';$('#gs-res').classList.remove('open');}
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.tb-search'))$('#gs-res').classList.remove('open');});
+/* —— 工具 —— */
+const fmt=n=>n==null||n===''?'—':n;
+function avatarColor(name){const cs=['#0d9488','#2563eb','#7c3aed','#d97706','#dc2626','#0891b2','#4f46e5','#059669'];let s=0;for(const ch of name)s=(s*31+ch.charCodeAt(0))%997;return cs[s%cs.length];}
+function avatarHtml(name,size){
+  const c=avatarColor(name);const fs=size?Math.round(size*0.42):13;
+  return '<div class="avatar" style="width:'+(size||32)+'px;height:'+(size||32)+'px;font-size:'+fs+'px;background:linear-gradient(135deg,'+c+','+c+'cc)">'+esc(name.slice(0,1))+'</div>';
+}
+/* ===================== 视图：工作台 ===================== */
+const DASH_STATS=[
+ {ico:'users',cls:'teal',val:'12,486',lbl:'注册用户',delta:'+128 本周'},
+ {ico:'plus',cls:'blue',val:'86',lbl:'今日新增用户',delta:'+12.4%'},
+ {ico:'plan',cls:'purple',val:'3,102',lbl:'已生成方案',delta:'+56 本周'},
+ {ico:'db',cls:'amber',val:'28,415',lbl:'数据记录总数',delta:'+1,204 本月'},
+];
+function vDashboard(){
+  const pending=USERS.filter(u=>u.planCount===0).slice(0,4);
+  const recent=[...USERS].sort((a,b)=>b.regTime.localeCompare(a.regTime)).slice(0,4);
+  const tblRows=TABLES.map(t=>({name:t.name,group:t.group,count:ROWS[t.key].length})).slice(0,6);
+  return `<div class="page-head"><div><h1>工作台</h1><div class="ph-sub">2026年10月6日 · 示例数据，用于原型演示</div></div>
+  <div class="ph-actions"><button class="btn" onclick="toast('数据已刷新','info')">${ic('refresh',14)} 刷新</button><button class="btn btn-primary" onclick="navTo('#/plan')">${ic('plus',14)} 新建方案</button></div></div>
+  <div class="stat-grid">${DASH_STATS.map(s=>`<div class="card stat-card"><div class="stat-ico ${s.cls}">${ic(s.ico,22)}</div><div><div class="stat-val num">${s.val}</div><div class="stat-lbl">${s.lbl}</div><span class="stat-delta">${s.delta}</span></div></div>`).join('')}</div>
+  <div class="dash-grid">
+    <div class="card chart-card"><div class="card-title">近 30 日新增用户</div><div class="card-sub">示例趋势数据</div><div class="chart-box" id="chart-line"></div></div>
+    <div class="card chart-card"><div class="card-title">升学类型分布</div><div class="card-sub">示例占比数据</div><div class="chart-donut" id="chart-donut"></div></div>
+  </div>
+  <div class="dash-grid2">
+    <div class="card card-pad"><div class="card-title">待规划用户</div><div class="card-sub">尚未生成任何报考方案</div>
+      <div style="margin-top:8px">${pending.map(u=>`<div class="list-item">${avatarHtml(u.name,32)}<div class="li-main"><div class="li-title">${esc(u.name)} <span class="tag tag-gray" style="margin-left:4px">${esc(u.types[0])}</span></div><div class="li-sub">${esc(u.school)} · 高考年份 ${u.year}</div></div><button class="btn btn-sm btn-primary" onclick="navTo('#/plan?uid=${u.id}')">去规划</button></div>`).join('')}</div>
+    </div>
+    <div class="card card-pad"><div class="card-title">最近注册</div><div class="card-sub">最新加入的学生用户</div>
+      <div style="margin-top:8px">${recent.map(u=>`<div class="list-item" style="cursor:pointer" onclick="navTo('#/user/${u.id}')">${avatarHtml(u.name,32)}<div class="li-main"><div class="li-title">${esc(u.name)}</div><div class="li-sub">${u.regTime} 注册</div></div><button class="icon-btn" onclick="event.stopPropagation();navTo('#/user/${u.id}')">${ic('chevR',14)}</button></div>`).join('')}</div>
+    </div>
+    <div class="card card-pad"><div class="card-title">数据表记录数</div><div class="card-sub">12 张业务数据表 · 示例记录数</div>
+      <div style="margin-top:8px">${tblRows.map(t=>`<div class="list-item"><div class="dm-ico" style="width:30px;height:30px;border-radius:8px;${t.group==='sanyi'?'background:var(--t100);color:var(--t700)':'background:var(--info-bg);color:#1d4ed8'}">${ic(t.group==='sanyi'?'book':'school',15)}</div><div class="li-main"><div class="li-title">${esc(t.name)}</div></div><span class="num" style="font-weight:600">${t.count}</span></div>`).join('')}<div class="card-ft"><button class="btn btn-sm" onclick="navTo('#/data/sxyxk')">进入数据管理</button></div></div>
+    </div>
+  </div>`;
+}
+function initDashCharts(){
+  const days=30,now=new Date();const dates=[],vals=[];
+  for(let i=days-1;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);dates.push((d.getMonth()+1)+'/'+d.getDate());vals.push(40+Math.round(26*Math.sin(i/4.2)+i*1.4+Math.random()*14));}
+  const base={textStyle:{fontFamily:'Inter,Noto Sans SC,PingFang SC,Microsoft YaHei,sans-serif',color:'#64748b'},grid:{left:8,right:14,top:30,bottom:26,containLabel:true}};
+  const lineOpt=Object.assign({},base,{tooltip:{trigger:'axis',triggerOn:'mousemove|click',renderMode:'richText',confine:true},xAxis:{type:'category',boundaryGap:false,data:dates,axisLine:{lineStyle:{color:'#cbd5e1'}},axisLabel:{color:'#94a3b8',fontSize:10,interval:4}},yAxis:{type:'value',splitLine:{lineStyle:{color:'#eef2f5'}},axisLabel:{color:'#94a3b8',fontSize:10}},series:[{type:'line',data:vals,smooth:true,symbolSize:5,lineStyle:{width:2,color:'#0d9488'},itemStyle:{color:'#0d9488'},areaStyle:{color:'rgba(13,148,136,.10)'}}]});
+  const donutOpt=Object.assign({},base,{tooltip:{trigger:'item',triggerOn:'mousemove|click',renderMode:'richText',confine:true},legend:{bottom:0,itemWidth:12,itemHeight:12,textStyle:{color:'#64748b',fontSize:11}},series:[{type:'pie',radius:['52%','72%'],center:['50%','44%'],avoidLabelOverlap:true,label:{show:true,fontSize:11,color:'#475569',formatter:'{b}\n{d}%'},data:[{name:'省属三位一体',value:42,itemStyle:{color:'#0d9488'}},{name:'高职提前招生',value:38,itemStyle:{color:'#2dd4bf'}},{name:'普通高考',value:20,itemStyle:{color:'#99f6e4'}}]}]});
+  if(window.echarts){const l=echarts.init($('#chart-line'));l.setOption(lineOpt);window._charts=[l];const d=echarts.init($('#chart-donut'));d.setOption(donutOpt);window._charts.push(d);}
+  else{
+    window._echartsPending=true;
+    $('#chart-line').innerHTML='<div style="display:flex;align-items:flex-end;gap:3px;height:100%;padding-top:20px">'+vals.slice(-20).map(v=>'<div style="flex:1;background:#0d9488;border-radius:3px 3px 0 0;opacity:.75;height:'+Math.max(8,v*0.6)+'px"></div>').join('')+'</div>';
+    $('#chart-donut').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted)">图表库加载失败，已降级为静态示意</div>';
+  }
+}
+/* ===================== 视图：用户列表 ===================== */
+const UF={kw:'',types:'all',year:'all',teacher:'all',status:'all',page:1,pageSize:8,sel:new Set()};
+function filteredUsers(){
+  let list=USERS.filter(u=>{
+    if(UF.kw&&!(u.name.includes(UF.kw)||u.uid.includes(UF.kw)||u.phone.includes(UF.kw)))return false;
+    if(UF.types!=='all'&&!u.types.includes(UF.types))return false;
+    if(UF.year!=='all'&&u.year!==UF.year)return false;
+    if(UF.teacher!=='all'&&u.teacher!==UF.teacher)return false;
+    if(UF.status!=='all'&&u.status!==UF.status)return false;
+    return true;
+  });
+  return list;
+}
+function vUsers(){
+  const list=filteredUsers();
+  const pages=Math.max(1,Math.ceil(list.length/UF.pageSize));
+  if(UF.page>pages)UF.page=pages;
+  const start=(UF.page-1)*UF.pageSize,pageRows=list.slice(start,start+UF.pageSize);
+  const years=[...new Set(USERS.map(u=>u.year))].sort();
+  const teachers=[...new Set(USERS.map(u=>u.teacher))];
+  return `<div class="page-head"><div><h1>用户管理</h1><div class="ph-sub">共 ${USERS.length} 个示例用户 · 支持查看详情与代用户规划方案</div></div>
+  <div class="ph-actions"><button class="btn" onclick="openUserEdit()">${ic('plus',14)} 新增用户</button><button class="btn" onclick="uploadModal('users')">${ic('upload',14)} 批量导入</button><button class="btn" onclick="toast('已导出用户列表','info')">${ic('download',14)} 导出</button></div></div>
+  <div class="card">
+    <div class="filter-bar">
+      <span class="fb-label">关键词</span><input class="input" style="width:180px" placeholder="姓名 / 用户ID / 手机号" value="${esc(UF.kw)}" oninput="ufFilter(this.value)">
+      <span class="fb-label">升学类型</span><select class="select" onchange="UF.types=this.value;UF.page=1;utRefreshPart()"><option value="all" ${UF.types==='all'?'selected':''}>全部</option><option value="省属三位一体" ${UF.types==='省属三位一体'?'selected':''}>省属三位一体</option><option value="高职提前招生" ${UF.types==='高职提前招生'?'selected':''}>高职提前招生</option><option value="普通高考" ${UF.types==='普通高考'?'selected':''}>普通高考</option></select>
+      <span class="fb-label">高考年份</span><select class="select" onchange="UF.year=this.value;UF.page=1;utRefreshPart()"><option value="all">全部</option>${years.map(y=>'<option value="'+y+'" '+(UF.year==y?'selected':'')+'>'+y+'</option>').join('')}</select>
+      <span class="fb-label">规划老师</span><select class="select" onchange="UF.teacher=this.value;UF.page=1;utRefreshPart()"><option value="all">全部</option>${teachers.map(t=>'<option value="'+t+'" '+(UF.teacher==t?'selected':'')+'>'+t+'</option>').join('')}</select>
+      <span class="fb-label">状态</span><select class="select" onchange="UF.status=this.value;UF.page=1;utRefreshPart()"><option value="all">全部</option><option value="正常" ${UF.status==='正常'?'selected':''}>正常</option><option value="停用" ${UF.status==='停用'?'selected':''}>停用</option></select>
+      <button class="btn btn-sm" onclick="UF.kw='';UF.types='all';UF.year='all';UF.teacher='all';UF.status='all';UF.page=1;utRefreshPart();const i=document.querySelector('#ut-search');if(i)i.value='';">重置</button>
+    </div>
+    <div class="toolbar">
+      <input type="checkbox" class="checkbox" id="ck-all" onchange="toggleAll(this.checked)">
+      <span class="tb-title">用户列表</span><span class="badge-count num" id="ut-count">${list.length} 条</span>
+      <div class="spacer"></div>
+      <button class="btn btn-sm ${UF.sel.size?'':'btn-ghost'}" ${UF.sel.size?'':'disabled'} onclick="batchDelUser()">${ic('trash',14)} 删除选中 (${UF.sel.size})</button>
+    </div>
+    <div class="table-wrap">
+    <table class="tbl"><colgroup><col style="width:36px"><col style="width:110px"><col style="width:150px"><col style="width:120px"><col style="width:200px"><col style="width:90px"><col style="width:150px"><col style="width:100px"><col style="width:90px"><col style="width:80px"><col style="width:200px"></colgroup>
+      <thead><tr><th></th><th>用户ID</th><th>姓名 / 昵称</th><th>手机号</th><th>升学类型</th><th>高考年份</th><th>所属高中</th><th>规划老师</th><th>注册时间</th><th>方案数</th><th>操作</th></tr></thead>
+      <tbody id="ut-tbody">${userRowsHtml(pageRows)}</tbody>
+    </table>
+    </div>
+    <div class="pager" id="ut-pager">${userPagerHtml(list.length,pages)}</div>
+  </div>`;
+}
+function userRowsHtml(rows){
+  if(!rows.length)return `<tr><td colspan="11"><div class="empty"><div class="e-ico">${ic('users',24)}</div><p>没有符合条件的用户</p><button class="btn" onclick="UF.kw='';UF.types='all';UF.year='all';UF.teacher='all';UF.status='all';UF.page=1;utRefreshPart()">清除筛选</button></div></td></tr>`;
+  return rows.map(u=>`<tr>
+    <td><input type="checkbox" class="checkbox" ${UF.sel.has(u.id)?'checked':''} onchange="toggleSel('${u.id}',this.checked)"></td>
+    <td><span class="rowlink" onclick="navTo('#/user/${u.id}')">${esc(u.uid)}</span></td>
+    <td><div style="display:flex;align-items:center;gap:9px">${avatarHtml(u.name,30)}<div><div style="font-weight:600;font-size:13px">${esc(u.name)}</div>${u.nick?'<div style="font-size:11px;color:var(--muted)">'+esc(u.nick)+'</div>':''}</div></div></td>
+    <td class="num">${esc(u.phone)}</td>
+    <td>${u.types.map(t=>'<span class="tag '+(t==='省属三位一体'?'tag-teal':t==='高职提前招生'?'tag-blue':'tag-gray')+'" style="margin:1px 2px 1px 0">'+t+'</span>').join('')}</td>
+    <td class="num">${u.year}</td>
+    <td>${esc(u.school)}</td>
+    <td>${esc(u.teacher)}</td>
+    <td class="num" style="font-size:12px">${u.regTime}</td>
+    <td><span class="num" style="font-weight:600">${u.planCount}</span></td>
+    <td><div class="op-links"><button onclick="navTo('#/user/${u.id}')">详情</button><button onclick="navTo('#/plan?uid=${u.id}')">规划方案</button></div></td>
+  </tr>`).join('');
+}
+function userPagerHtml(total,pages){
+  return `<span class="pager-info">共 ${total} 条 · 第 ${UF.page}/${pages} 页</span>
+  <div class="pager-btns"><button class="pg" ${UF.page<=1?'disabled':''} onclick="UF.page--;utRefreshPart()">${ic('chevL',13)}</button>${Array.from({length:pages},(_,i)=>`<button class="pg ${i+1===UF.page?'active':''}" onclick="UF.page=${i+1};utRefreshPart()">${i+1}</button>`).join('')}<button class="pg" ${UF.page>=pages?'disabled':''} onclick="UF.page++;utRefreshPart()">${ic('chevR',13)}</button></div>`;
+}
+function ufFilter(v){UF.kw=v;UF.page=1;utRefreshPart();}
+function utRefreshPart(){
+  const list=filteredUsers();
+  const pages=Math.max(1,Math.ceil(list.length/UF.pageSize));
+  if(UF.page>pages)UF.page=pages;
+  const start=(UF.page-1)*UF.pageSize;
+  $('#ut-tbody').innerHTML=userRowsHtml(list.slice(start,start+UF.pageSize));
+  $('#ut-pager').innerHTML=userPagerHtml(list.length,pages);
+  $('#ut-count').textContent=list.length+' 条';
+  const all=$('#ck-all');if(all)all.checked=UF.sel.size===list.length&&list.length>0;
+}
+function toggleSel(id,on){on?UF.sel.add(id):UF.sel.delete(id);const list=filteredUsers();const all=$('#ck-all');if(all)all.checked=UF.sel.size===list.length&&list.length>0;}
+function toggleAll(on){const list=filteredUsers();const ids=list.map(u=>u.id);UF.sel.clear();if(on)ids.forEach(id=>UF.sel.add(id));renderCurrent();}
+function batchDelUser(){
+  const n=UF.sel.size;
+  confirmModal({title:'批量删除用户',message:'确定要删除选中的 <b>'+n+'</b> 个用户吗？删除后其规划方案与成绩数据将一并移除，该操作不可恢复。',danger:true,okText:'删除',onOk:()=>{
+    UF.sel.forEach(id=>{const i=USERS.findIndex(u=>u.id===id);if(i>-1)USERS.splice(i,1);});
+    const pc=PLANS.length;for(let i=PLANS.length-1;i>=0;i--)if(UF.sel.has(PLANS[i].uid))PLANS.splice(i,1);
+    UF.sel.clear();renderCurrent();toast('已删除 '+n+' 个用户及关联数据');
+  }});
+}
+function renderCurrent(){router();}
+/* ===================== 视图：用户详情 ===================== */
+const UTAB={cur:'base'};
+function vUserDetail(id){
+  const u=userById(id);
+  if(!u)return '<div class="empty"><div class="e-ico">'+ic('alert',24)+'</div><p>未找到该用户</p><button class="btn" onclick="navTo(\'#/users\')">返回用户列表</button></div>';
+  UTAB.cur='base';
+  const tabs=[['base','基本信息'],['school','升学信息'],['score','学习成绩'],['prefer','升学偏好'],['body','身体条件'],['plan','规划方案']];
+  return `<div class="page-head"><div><button class="btn btn-sm btn-ghost" style="margin-bottom:10px" onclick="navTo('#/users')">${ic('arrowL',14)} 返回用户列表</button>
+  <h1>用户详情</h1><div class="ph-sub">用户ID：${esc(u.uid)} · 注册于 ${u.regTime}</div></div>
+  <div class="ph-actions"><button class="btn" onclick="openUserEdit('${u.id}')">${ic('edit',14)} 编辑资料</button><button class="btn btn-primary" onclick="navTo('#/plan?uid=${u.id}')">${ic('spark',14)} 规划方案</button></div></div>
+  <div class="card user-hero">
+    ${avatarHtml(u.name,64)}
+    <div class="uh-main">
+      <div class="uh-name">${esc(u.name)} ${u.nick?'<span class="tag tag-gray">'+esc(u.nick)+'</span>':''}<span class="tag ${u.status==='正常'?'tag-green':'tag-red'}">${u.status}</span></div>
+      <div class="uh-meta"><span>${ic('phone',13)} ${esc(u.phone)}</span><span>${ic('mapPin',13)} ${esc(u.district)}</span><span>${ic('calendar',13)} ${u.year} 年高考</span><span>${ic('school',13)} ${esc(u.school)}</span><span>${ic('user',13)} 规划老师：${esc(u.teacher)}</span></div>
+      <div style="margin-top:10px">${u.types.map(t=>'<span class="tag '+(t==='省属三位一体'?'tag-teal':t==='高职提前招生'?'tag-blue':'tag-gray')+'" style="margin-right:6px">'+t+'</span>').join('')}</div>
+    </div>
+    <div class="uh-actions"></div>
+  </div>
+  <div class="card card-pad">
+    <div class="tabs">${tabs.map(t=>'<button class="tab-btn'+(t[0]===UTAB.cur?' active':'')+'" onclick="switchUTab(\''+t[0]+'\')">'+t[1]+'</button>').join('')}</div>
+    <div id="utab-body">${userTabBody(u,UTAB.cur)}</div>
+  </div>`;
+}
+function switchUTab(k){UTAB.cur=k;const u=userById(location.hash.split('/')[2]);$('#utab-body').innerHTML=userTabBody(u,k);document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.textContent===uTabName(k)));}
+function uTabName(k){return {base:'基本信息',school:'升学信息',score:'学习成绩',prefer:'升学偏好',body:'身体条件',plan:'规划方案'}[k];}
+function initUserTabs(){}
+function userTabBody(u,k){
+  if(k==='base')return `<div class="kv-grid">
+    <div class="kv"><div class="k">账号信息 / 用户ID</div><div class="v num">${esc(u.uid)}</div></div>
+    <div class="kv"><div class="k">账号信息 / 手机号</div><div class="v num">${esc(u.phone)}</div></div>
+    <div class="kv"><div class="k">账号信息 / 昵称</div><div class="v">${esc(u.nick||'—')}</div></div>
+    <div class="kv"><div class="k">基本信息 / 出生年月日</div><div class="v">${esc(u.birth)}</div></div>
+    <div class="kv"><div class="k">基本信息 / 所在区县</div><div class="v">${esc(u.district)}</div></div>
+    <div class="kv"><div class="k">基本信息 / 性别</div><div class="v">${esc(u.gender)}</div></div>
+    <div class="kv"><div class="k">基本信息 / 姓名</div><div class="v">${esc(u.name)}</div></div>
+    <div class="kv"><div class="k">状态</div><div class="v"><span class="tag ${u.status==='正常'?'tag-green':'tag-red'}">${u.status}</span></div></div>
+  </div>`;
+  if(k==='school')return `<div class="kv-grid">
+    <div class="kv"><div class="k">高考年份</div><div class="v">${u.year}</div></div>
+    <div class="kv"><div class="k">升学类型</div><div class="v">${u.types.map(t=>'<span class="tag tag-teal" style="margin-right:4px">'+t+'</span>').join('')}</div></div>
+    <div class="kv"><div class="k">所属高中</div><div class="v">${esc(u.school)}</div></div>
+    <div class="kv"><div class="k">所属班级</div><div class="v">${esc(u.cls)}</div></div>
+    <div class="kv"><div class="k">规划老师</div><div class="v">${esc(u.teacher)}</div></div>
+    <div class="kv"><div class="k">选科组合</div><div class="v"><div class="chip-row">${u.subjects.map(s=>'<span class="chip pick">'+s+'</span>').join('')}</div></div></div>
+    <div class="kv"><div class="k">外语种类</div><div class="v">${esc(u.foreign)}</div></div>
+    <div class="kv"><div class="k">学考成绩</div><div class="v"><button class="btn btn-sm" onclick="switchUTab('score')">查看 10 门学考等级</button></div></div>
+  </div>`;
+  if(k==='score')return `
+    <div class="card-sub" style="margin-bottom:12px">学考成绩 · 十门科目等级（A/B/C/D/E）</div>
+    <div class="grade-grid">${SUBJECTS.map(s=>{const g=u.grades[s]||'—';const c=g==='A'?'var(--success)':g==='B'?'var(--info)':g==='C'?'var(--warning)':'var(--danger)';return `<div class="grade-cell"><div class="gc-sub">${s}</div><div class="gc-val" style="color:${c}">${g}</div></div>`;}).join('')}</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px">
+      <div class="kv"><div class="k">预估高考分</div><div class="v num">${u.estScore?u.estScore:'—'}</div></div>
+      <div class="kv"><div class="k">首考分（英语+选考三科）</div><div class="v num">${u.firstScore?u.firstScore:'—'}</div></div>
+      <div class="kv"><div class="k">一模 / 二模 / 三模</div><div class="v num">${u.m1?u.m1+' / '+u.m2+' / '+u.m3:'—'}</div></div>
+    </div>
+    <div class="card-sub" style="margin:22px 0 12px">综合素质评价 · 五个维度（A/B/C 三档）</div>
+    <div class="grade-grid">${Object.entries(u.zhsz).map(([k,v])=>{const c=v==='A'?'var(--success)':v==='B'?'var(--info)':'var(--warning)';return `<div class="grade-cell"><div class="gc-sub">${k}</div><div class="gc-val" style="color:${c}">${v}</div></div>`;}).join('')}</div>`;
+  if(k==='prefer')return `
+    <div style="display:grid;gap:18px">
+      <div><div class="card-sub" style="margin-bottom:8px">特长</div><div style="background:var(--s50);border:1px solid var(--s100);border-radius:var(--r-md);padding:12px 14px;font-size:13.5px">${esc(u.talent||'—')}</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div><div class="card-sub" style="margin-bottom:8px">意向地区</div><div class="chip-row">${(u.wantRegion||[]).map(s=>'<span class="chip pick">'+s+'</span>').join('')||'<span style="color:var(--muted);font-size:12.5px">未填写</span>'}</div></div>
+        <div><div class="card-sub" style="margin-bottom:8px">不考虑地区</div><div class="chip-row">${(u.notRegion||[]).map(s=>'<span class="chip x">'+s+'</span>').join('')||'<span style="color:var(--muted);font-size:12.5px">无</span>'}</div></div>
+        <div><div class="card-sub" style="margin-bottom:8px">意向院校</div><div class="chip-row">${(u.wantSchool||[]).map(s=>'<span class="chip pick">'+s+'</span>').join('')||'<span style="color:var(--muted);font-size:12.5px">未填写</span>'}</div></div>
+        <div><div class="card-sub" style="margin-bottom:8px">不考虑院校</div><div class="chip-row">${(u.notSchool||[]).map(s=>'<span class="chip x">'+s+'</span>').join('')||'<span style="color:var(--muted);font-size:12.5px">无</span>'}</div></div>
+        <div><div class="card-sub" style="margin-bottom:8px">意向专业</div><div class="chip-row">${(u.wantMajor||[]).map(s=>'<span class="chip pick">'+s+'</span>').join('')||'<span style="color:var(--muted);font-size:12.5px">未填写</span>'}</div></div>
+        <div><div class="card-sub" style="margin-bottom:8px">不考虑专业</div><div class="chip-row">${(u.notMajor||[]).map(s=>'<span class="chip x">'+s+'</span>').join('')||'<span style="color:var(--muted);font-size:12.5px">无</span>'}</div></div>
+      </div>
+      <div><div class="card-sub" style="margin-bottom:8px">期望办学性质</div><div class="chip-row"><span class="chip pick">${esc(u.nature||'不限')}</span></div></div>
+    </div>`;
+  if(k==='body')return `<div class="kv-grid">
+    <div class="kv"><div class="k">身高</div><div class="v">${esc(u.height||'—')}</div></div>
+    <div class="kv"><div class="k">体重</div><div class="v">${esc(u.weight||'—')}</div></div>
+    <div class="kv"><div class="k">视力</div><div class="v">—</div></div>
+    <div class="kv"><div class="k">其他身体条件</div><div class="v">—</div></div>
+  </div>`;
+  if(k==='plan'){
+    const plans=plansOf(u.id);
+    const planner=plans.filter(p=>p.src!=='student'),student=plans.filter(p=>p.src==='student');
+    const planTable=(list,emptyMsg)=>`<table class="tbl"><colgroup><col style="width:26%"><col style="width:13%"><col style="width:10%"><col style="width:12%"><col style="width:14%"><col style="width:12%"><col style="width:13%"></colgroup>
+    <thead><tr><th>方案名称</th><th>类型</th><th>志愿数</th><th>状态</th><th>创建人</th><th>创建时间</th><th>操作</th></tr></thead>
+    <tbody>${list.length?list.map(p=>`<tr>
+      <td style="font-weight:600">${esc(p.name)}</td>
+      <td><span class="tag ${p.type==='sanyi'?'tag-teal':'tag-blue'}">${p.type==='sanyi'?'三位一体':'高职提招'}</span></td>
+      <td class="num">${p.items.length}</td>
+      <td><span class="tag ${PLAN_STATUS[p.status].cls}">${PLAN_STATUS[p.status].label}</span></td>
+      <td>${esc(p.creator)}</td>
+      <td class="num" style="font-size:12px">${p.createdAt.slice(0,10)}</td>
+      <td><div class="op-links"><button onclick="viewPlanDetail('${p.id}')">查看</button><button onclick="toast('演示：进入方案编辑','info')">编辑</button><button class="danger" onclick="delPlan('${p.id}')">删除</button></div></td>
+    </tr>`).join(''):`<tr><td colspan="7"><div class="empty" style="padding:22px 10px"><div class="e-ico">${ic('plan',22)}</div><p>${emptyMsg}</p></div></td></tr>`}</tbody></table>`;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="card-sub" style="margin:0">该用户共 ${plans.length} 个规划方案（规划师方案 ${planner.length} 个 · 学生自主方案 ${student.length} 个）</div><button class="btn btn-primary btn-sm" onclick="navTo('#/plan?uid=${u.id}')">${ic('plus',13)} 新建方案</button></div>
+    <div style="display:flex;align-items:center;gap:8px;margin:0 0 10px"><span class="tag tag-teal" style="height:22px">规划师方案</span><span class="card-sub" style="margin:0">由规划老师（张老师 / 陈老师）代用户生成</span></div>
+    ${planTable(planner,'暂无规划师方案，可点击「新建方案」代用户规划')}
+    <div style="display:flex;align-items:center;gap:8px;margin:22px 0 10px"><span class="tag tag-blue" style="height:22px">学生自己的方案</span><span class="card-sub" style="margin:0">由学生本人自主生成</span></div>
+    ${planTable(student,'学生暂无自主方案')}`;
+  }
+}
+function viewPlanDetail(pid){
+  const p=PLANS.find(x=>x.id===pid);if(!p)return;
+  const u=userById(p.uid);
+  openModal(`<div class="modal-head"><h3>方案详情 · ${esc(p.name)}</h3><button class="icon-btn" onclick="closeModal()">${ic('x',16)}</button></div>
+  <div class="modal-body" style="max-height:calc(100vh - 190px);overflow-y:auto">
+    <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:16px;font-size:12.5px;color:var(--muted)">
+      <span>用户：<b style="color:var(--s800)">${esc(u?u.name:'—')}</b></span><span>类型：<b style="color:var(--s800)">${p.type==='sanyi'?'三位一体':'高职提招'}</b></span><span>高考年份：<b style="color:var(--s800)">${p.year}</b></span>
+      <span>状态：<span class="tag ${PLAN_STATUS[p.status].cls}">${PLAN_STATUS[p.status].label}</span></span><span>创建：${esc(p.creator)} / ${esc(p.createdAt)}</span>
+    </div>
+    ${planResultHtml({name:p.name,type:p.type,year:p.year,u,items:p.items,extra:p.extra||{},meta:{creator:p.creator,createdAt:p.createdAt}})}
+  </div>
+  <div class="modal-foot"><button class="btn" onclick="closeModal()">关闭</button><button class="btn btn-primary" onclick="toast('演示：导出方案 PDF','info');closeModal()">${ic('download',14)} 导出方案</button></div>`,'modal-xl');
+}
+function delPlan(pid){
+  confirmModal({title:'删除方案',message:'确定要删除该规划方案吗？该操作不可恢复。',danger:true,okText:'删除',onOk:()=>{const i=PLANS.findIndex(p=>p.id===pid);if(i>-1)PLANS.splice(i,1);const u=userById(location.hash.split('/')[2]);if(u){u.planCount=plansOf(u.id).length;}renderCurrent();toast('方案已删除');}});
+}
+const UE={subjects:[],grades:{},zhsz:{}};
+function ueInit(u){UE.subjects=u?u.subjects.slice():[];UE.grades=u?Object.assign({},u.grades):{};UE.zhsz=u?Object.assign({},u.zhsz):{};}
+function ueSub(s){
+  const i=UE.subjects.indexOf(s);
+  if(i>-1)UE.subjects.splice(i,1);else if(UE.subjects.length<3)UE.subjects.push(s);else{toast('选科最多选择 3 门','error');return;}
+  const el=$('#ue-sub-'+s);if(el)el.classList.toggle('pick',UE.subjects.includes(s));
+}
+function ueGrade(s,v){UE.grades[s]=v;const box=$('#ue-grow-'+s);if(box)box.querySelectorAll('.gp-opt').forEach(b=>b.classList.toggle('pick',b.textContent===v));}
+function ueZhs(k,v){UE.zhsz[k]=v;const box=$('#ue-zh-'+k);if(box)box.querySelectorAll('.gp-opt').forEach(b=>b.classList.toggle('pick',b.textContent===v));}
+function splitTags(v){return String(v||'').split(/[,，、]/).map(x=>x.trim()).filter(Boolean);}
+function openUserEdit(uid){
+  const u=uid?userById(uid):null;
+  ueInit(u);
+  const base={uid:u?u.uid:'',phone:u?u.phone:'',name:u?u.name:'',nick:u?u.nick:'',birth:u?u.birth:'',district:u?u.district:'',gender:u?u.gender:'男',year:u?u.year:'2026',types:u?u.types[0]:'省属三位一体',school:u?u.school:'',cls:u?u.cls:'',teacher:u?u.teacher:'张老师',foreign:u?u.foreign:'英语',estScore:u&&u.estScore?u.estScore:'',firstScore:u&&u.firstScore?u.firstScore:'',m1:u&&u.m1?u.m1:'',m2:u&&u.m2?u.m2:'',m3:u&&u.m3?u.m3:'',talent:u?u.talent:'',wantRegion:(u?u.wantRegion:[]).join('、'),notRegion:(u?u.notRegion:[]).join('、'),wantSchool:(u?u.wantSchool:[]).join('、'),notSchool:(u?u.notSchool:[]).join('、'),wantMajor:(u?u.wantMajor:[]).join('、'),notMajor:(u?u.notMajor:[]).join('、'),nature:u?u.nature:'不限',height:u?u.height:'',weight:u?u.weight:'',status:u?u.status:'正常'};
+  openModal(`<div class="modal-head"><h3>${u?'编辑用户资料':'新增用户'}<span class="card-sub" style="margin-left:8px">全部用户字段（参照《数据库字段》腾讯文档）</span></h3><button class="icon-btn" onclick="closeModal()">${ic('x',16)}</button></div>
+  <div class="modal-body" style="max-height:calc(100vh - 190px);overflow-y:auto"><div class="form-grid">
+    <div class="form-sec">账号信息</div>
+    <div class="form-item"><label>用户ID</label><input class="input" id="ue-uid" value="${esc(base.uid)}" placeholder="${u?'':'保存后自动生成'}"></div>
+    <div class="form-item"><label>手机号<span class="req">*</span></label><input class="input" id="ue-phone" value="${esc(base.phone)}" placeholder="请输入手机号"></div>
+    <div class="form-item"><label>姓名<span class="req">*</span></label><input class="input" id="ue-name" value="${esc(base.name)}" placeholder="请输入姓名"></div>
+    <div class="form-item"><label>昵称</label><input class="input" id="ue-nick" value="${esc(base.nick)}" placeholder="请输入昵称"></div>
+    <div class="form-sec">基本信息</div>
+    <div class="form-item"><label>出生年月日</label><input class="input" id="ue-birth" value="${esc(base.birth)}" placeholder="如 2008-06-15"></div>
+    <div class="form-item"><label>所在区县</label><input class="input" id="ue-district" value="${esc(base.district)}" placeholder="如 杭州上城区"></div>
+    <div class="form-item"><label>性别</label><select class="select" id="ue-gender"><option ${base.gender==='男'?'selected':''}>男</option><option ${base.gender==='女'?'selected':''}>女</option></select></div>
+    <div class="form-item"><label>状态</label><select class="select" id="ue-status"><option ${base.status==='正常'?'selected':''}>正常</option><option ${base.status==='禁用'?'selected':''}>禁用</option></select></div>
+    <div class="form-sec">学校升学信息</div>
+    <div class="form-item"><label>高考年份</label><select class="select" id="ue-year"><option ${base.year==='2026'?'selected':''}>2026</option><option ${base.year==='2027'?'selected':''}>2027</option><option ${base.year==='2028'?'selected':''}>2028</option></select></div>
+    <div class="form-item"><label>升学类型<span class="req">*</span></label><select class="select" id="ue-types"><option ${base.types==='省属三位一体'?'selected':''}>省属三位一体</option><option ${base.types==='高职提前招生'?'selected':''}>高职提前招生</option><option ${base.types==='普通高考'?'selected':''}>普通高考</option></select></div>
+    <div class="form-item"><label>所属高中</label><input class="input" id="ue-school" value="${esc(base.school)}" placeholder="请输入高中全称"></div>
+    <div class="form-item"><label>所属班级</label><input class="input" id="ue-cls" value="${esc(base.cls)}" placeholder="如 高三(1)班"></div>
+    <div class="form-item"><label>规划老师</label><select class="select" id="ue-teacher"><option ${base.teacher==='张老师'?'selected':''}>张老师</option><option ${base.teacher==='陈老师'?'selected':''}>陈老师</option><option ${base.teacher==='李老师'?'selected':''}>李老师</option></select></div>
+    <div class="form-item"><label>外语种类</label><select class="select" id="ue-foreign"><option ${base.foreign==='英语'?'selected':''}>英语</option><option ${base.foreign==='日语'?'selected':''}>日语</option><option ${base.foreign==='俄语'?'selected':''}>俄语</option><option ${base.foreign==='德语'?'selected':''}>德语</option><option ${base.foreign==='西班牙语'?'selected':''}>西班牙语</option></select></div>
+    <div class="form-item full"><label>选科组合（7 选 3）</label><div class="chip-row">${['物理','化学','生物','政治','历史','地理','技术'].map(s=>`<button type="button" class="subject-pick ${UE.subjects.includes(s)?'pick':''}" id="ue-sub-${s}" onclick="ueSub('${s}')">${s}</button>`).join('')}</div></div>
+    <div class="form-sec">学习成绩</div>
+    <div class="form-item full"><label>学考成绩 · 十门科目等级</label><div class="grade-picker">${SUBJECTS.map(s=>`<div class="gp-subject" id="ue-grow-${s}"><div class="gp-name">${s}</div><div class="gp-opts">${['A','B','C','D','E'].map(v=>`<button type="button" class="gp-opt ${UE.grades[s]===v?'pick':''}" onclick="ueGrade('${s}','${v}')">${v}</button>`).join('')}</div></div>`).join('')}</div></div>
+    <div class="form-item"><label>预估高考分</label><input class="input" type="number" id="ue-est" value="${esc(base.estScore)}" placeholder="如 610"></div>
+    <div class="form-item"><label>首考分（英语+选考三科）</label><input class="input" type="number" id="ue-first" value="${esc(base.firstScore)}" placeholder="如 385"></div>
+    <div class="form-item"><label>一模成绩</label><input class="input" type="number" id="ue-m1" value="${esc(base.m1)}" placeholder="如 598"></div>
+    <div class="form-item"><label>二模成绩</label><input class="input" type="number" id="ue-m2" value="${esc(base.m2)}" placeholder="如 602"></div>
+    <div class="form-item"><label>三模成绩</label><input class="input" type="number" id="ue-m3" value="${esc(base.m3)}" placeholder="如 615"></div>
+    <div class="form-item full"><label>综合素质评价 · 五个维度（A/B/C 三档）</label><div class="grade-picker">${['品德表现','学业水平','运动健康','创新实践','艺术素养'].map(k=>`<div class="gp-subject" id="ue-zh-${k}"><div class="gp-name">${k}</div><div class="gp-opts">${['A','B','C'].map(v=>`<button type="button" class="gp-opt ${UE.zhsz[k]===v?'pick':''}" onclick="ueZhs('${k}','${v}')">${v}</button>`).join('')}</div></div>`).join('')}</div></div>
+    <div class="form-sec">升学偏好</div>
+    <div class="form-item full"><label>特长</label><input class="input" id="ue-talent" value="${esc(base.talent)}" placeholder="如 钢琴十级、数学竞赛省二等奖"></div>
+    <div class="form-item"><label>意向地区</label><input class="input" id="ue-wantRegion" value="${esc(base.wantRegion)}" placeholder="如 杭州、宁波（顿号分隔）"></div>
+    <div class="form-item"><label>不考虑地区</label><input class="input" id="ue-notRegion" value="${esc(base.notRegion)}" placeholder="如 温州（顿号分隔）"></div>
+    <div class="form-item"><label>意向院校</label><input class="input" id="ue-wantSchool" value="${esc(base.wantSchool)}" placeholder="如 浙江工业大学、宁波大学"></div>
+    <div class="form-item"><label>不考虑院校</label><input class="input" id="ue-notSchool" value="${esc(base.notSchool)}" placeholder="顿号分隔"></div>
+    <div class="form-item"><label>意向专业</label><input class="input" id="ue-wantMajor" value="${esc(base.wantMajor)}" placeholder="如 计算机类、法学"></div>
+    <div class="form-item"><label>不考虑专业</label><input class="input" id="ue-notMajor" value="${esc(base.notMajor)}" placeholder="顿号分隔"></div>
+    <div class="form-item"><label>期望办学性质</label><select class="select" id="ue-nature"><option ${base.nature==='不限'?'selected':''}>不限</option><option ${base.nature==='公办'?'selected':''}>公办</option><option ${base.nature==='民办'?'selected':''}>民办</option><option ${base.nature==='中外合作'?'selected':''}>中外合作</option></select></div>
+    <div class="form-sec">身体条件</div>
+    <div class="form-item"><label>身高（CM）</label><input class="input" id="ue-height" value="${esc(base.height)}" placeholder="如 168 或 168CM"></div>
+    <div class="form-item"><label>体重（KG）</label><input class="input" id="ue-weight" value="${esc(base.weight)}" placeholder="如 55 或 55KG"></div>
+  </div></div>
+  <div class="modal-foot"><button class="btn" onclick="closeModal()">取消</button><button class="btn btn-primary" id="ue-save">${u?'保存修改':'创建用户'}</button></div>`,'modal-xl');
+  $('#ue-save').onclick=()=>{
+    const name=$('#ue-name').value.trim(),phone=$('#ue-phone').value.trim();
+    if(!name||!phone){toast('请填写姓名与手机号','error');return;}
+    const num=k=>{const el=$('#ue-'+k),v=el.value;return v===''?'':(isNaN(Number(v))?'':Number(v));};
+    const data={uid:$('#ue-uid').value.trim()||(u?u.uid:Math.floor(1e9+Math.random()*9e8)+''),name,nick:$('#ue-nick').value.trim(),phone,birth:$('#ue-birth').value.trim(),district:$('#ue-district').value.trim(),gender:$('#ue-gender').value,year:$('#ue-year').value,types:[$('#ue-types').value],school:$('#ue-school').value.trim(),cls:$('#ue-cls').value.trim(),teacher:$('#ue-teacher').value,foreign:$('#ue-foreign').value,subjects:UE.subjects.slice(),grades:Object.assign({},UE.grades),estScore:num('est'),firstScore:num('first'),m1:num('m1'),m2:num('m2'),m3:num('m3'),zhsz:Object.assign({},UE.zhsz),talent:$('#ue-talent').value.trim(),wantRegion:splitTags($('#ue-wantRegion').value),notRegion:splitTags($('#ue-notRegion').value),wantSchool:splitTags($('#ue-wantSchool').value),notSchool:splitTags($('#ue-notSchool').value),wantMajor:splitTags($('#ue-wantMajor').value),notMajor:splitTags($('#ue-notMajor').value),nature:$('#ue-nature').value,height:$('#ue-height').value.trim(),weight:$('#ue-weight').value.trim(),status:$('#ue-status').value};
+    if(u){Object.assign(u,data);toast('用户资料已更新');}
+    else{
+      const id='U'+String(USERS.length+1).padStart(4,'0');
+      USERS.unshift(Object.assign({id,regTime:new Date().toISOString().slice(0,10),planCount:0},data));
+      toast('用户创建成功');
+    }
+    closeModal();renderCurrent();
+  };
+}
+</script>
+<script>
+/* ===================== 方案规划（管理员代用户） ===================== */
+const WZ={step:1,uid:null,type:'',year:'2026',grades:{},subjects:[],foreign:'英语',estScore:'',gender:'男',height:'',vision:'',colorBlind:'正常',zhsz:{},list:[],name:''};
+function vPlan(){
+  const q=new URLSearchParams(location.hash.split('?')[1]||'');
+  if(q.get('uid')){WZ.uid=q.get('uid');WZ.step=WZ.uid?2:1;}
+  else if(!WZ.uid)WZ.step=1;
+  WZ.list=[];
+  return `<div class="page-head"><div><h1>方案规划</h1><div class="ph-sub">管理员可代用户录入学考成绩并生成报考方案</div></div></div>
+  <div class="card card-pad">
+    <div class="steps">${[1,2,3,4,5].map(s=>`<div class="step ${WZ.step===s?'active':WZ.step>s?'done':''}"><div class="s-dot">${WZ.step>s?ic('check',15):s}</div><div class="s-name">${['选择用户','方案类型','成绩与选科','志愿选择','预览生成'][s-1]}</div></div>`).join('')}</div>
+    <div class="wizard-body" id="wz-body">${wzStepHtml()}</div>
+  </div>`;
+}
+function wzStepHtml(){
+  switch(WZ.step){
+    case 1:return wzUser();
+    case 2:return wzType();
+    case 3:return wzScore();
+    case 4:return wzMajor();
+    case 5:return wzPreview();
+    case 6:return wzDone();
+  }
+}
+function wzFooter(){return `<div class="wz-actions"><button class="btn" ${WZ.step<=1?'disabled style="visibility:hidden"':''} onclick="wzBack()">${ic('chevL',14)} 上一步</button><div style="display:flex;gap:10px">${WZ.step<5?`<button class="btn btn-primary" onclick="wzNext()">下一步 ${ic('chevR',14)}</button>`:''}</div></div>`;}
+function wzUser(){
+  const q=new URLSearchParams(location.hash.split('?')[1]||'');
+  const pre=q.get('uid');
+  return `<div class="card-sub" style="margin-bottom:14px">搜索并选择需要规划方案的学生用户（管理员可代其录入成绩、选择志愿）</div>
+  <div style="display:flex;gap:10px;margin-bottom:16px"><input class="input" style="flex:1;max-width:420px" id="wz-u-kw" placeholder="按姓名 / 用户ID / 手机号搜索" oninput="renderWzUserList(this.value)"><span class="badge-count" style="align-self:center">${USERS.length} 个用户</span></div>
+  <div id="wz-user-list">${wzUserList('')}</div>${wzFooter()}`;
+}
+function renderWzUserList(kw){
+  const list=USERS.filter(u=>!kw||u.name.includes(kw)||u.uid.includes(kw)||u.phone.includes(kw));
+  $('#wz-user-list').innerHTML=`<div style="border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden">${list.map(u=>`<div class="list-item ${WZ.uid===u.id?'':''}" style="padding:13px 16px;cursor:pointer;${WZ.uid===u.id?'background:var(--t50)':''}" onclick="WZ.uid='${u.id}';renderWzUserList('${esc(kw)}')">
+    ${avatarHtml(u.name,36)}<div class="li-main"><div class="li-title">${esc(u.name)} ${u.planCount?`<span class="tag tag-gray" style="margin-left:4px">已有 ${u.planCount} 个方案</span>`:'<span class="tag tag-amber" style="margin-left:4px">待规划</span>'}</div>
+    <div class="li-sub">${esc(u.uid)} · ${esc(u.phone)} · ${esc(u.school)} · ${u.year} 年 · ${esc(u.types.join('、'))}</div></div>
+    <span class="radio-mark" style="width:18px;height:18px;border-radius:50%;border:2px solid ${WZ.uid===u.id?'var(--primary)':'var(--s300)'};background:${WZ.uid===u.id?'var(--primary)':'#fff'};display:inline-flex;align-items:center;justify-content:center">${WZ.uid===u.id?'<span style="width:6px;height:6px;border-radius:50%;background:#fff"></span>':''}</span>
+  </div>`).join('')||'<div class="empty"><p>未找到匹配用户</p></div>'}</div>`;
+}
+function wzType(){
+  const u=userById(WZ.uid);
+  return `<div style="margin-bottom:18px;display:flex;align-items:center;gap:10px">${u?avatarHtml(u.name,36):''}<div><div style="font-weight:600;font-size:15px">${u?esc(u.name):'未选择用户'}</div><div class="card-sub">${u?esc(u.school)+' · '+u.year+' 年高考 · 意向：'+esc(u.types.join('、')):'请先返回上一步选择用户'}</div></div></div>
+  <div class="type-cards">
+    <div class="type-card ${WZ.type==='sanyi'?'selected':''}" onclick="WZ.type='sanyi';WZ.year=u?u.year:'2026';renderWizard()">
+      <span class="badge-count tc-count">42 所本科高校</span>
+      <div class="tc-ico teal">${ic('book',24)}</div>
+      <h3>三位一体（综合评价招生）</h3>
+      <div class="tc-desc">需录入 10 门学考等级、高考“7 选 3”选考科目及高考预估分，生成冲 / 稳 / 保梯度志愿方案。适用于浙江工业大学、浙江师范大学等本科高校。</div>
+    </div>
+    <div class="type-card ${WZ.type==='gaozhi'?'selected':''}" onclick="WZ.type='gaozhi';WZ.year=u?u.year:'2026';renderWizard()">
+      <span class="badge-count tc-count">47 所高职院校</span>
+      <div class="tc-ico blue">${ic('school',24)}</div>
+      <h3>高职提前招生</h3>
+      <div class="tc-desc">需录入 10 门学考等级并选择外语种类，按学考折算分 + 综测成绩生成方案。适用于金华职业技术大学、浙江机电职业技术学院等高职院校。</div>
+    </div>
+  </div>
+  <div style="margin-top:18px;display:flex;align-items:center;gap:10px"><span class="fb-label">高考年份</span><select class="select" id="wz-year" onchange="WZ.year=this.value"><option>2026</option><option>2027</option><option>2028</option></select><span class="card-sub">用于匹配对应年份的报名 / 初审 / 综测 / 录取数据</span></div>
+  ${wzFooter()}`;
+}
+function wzScore(){
+  const u=userById(WZ.uid);if(!u)return '<div class="empty"><p>请先选择用户</p></div>';
+  if(!Object.keys(WZ.grades).length)WZ.grades=Object.assign({},u.grades||{});
+  if(!WZ.subjects.length)WZ.subjects=u.subjects.slice();
+  if(!Object.keys(WZ.zhsz).length&&u.zhsz)WZ.zhsz={品德表现:u.zhsz['品德表现']||'',运动健康:u.zhsz['运动健康']||'',艺术素养:u.zhsz['艺术素养']||'',创新实践:u.zhsz['创新实践']||''};
+  if(!WZ.height&&u.height)WZ.height=String(u.height).replace(/[^0-9]/g,'');
+  const type=WZ.type==='sanyi';
+  const nGrade=SUBJECTS.filter(s=>WZ.grades[s]).length;
+  const calc=xkCalc(WZ.type,WZ.grades);
+  const zhKeys=['品德表现','运动健康','艺术素养','创新实践'];
+  const nZh=zhKeys.filter(k=>WZ.zhsz[k]).length;
+  const basic=`<div class="form-grid" style="margin-bottom:24px">
+    <div class="form-sec">考生基本信息</div>
+    <div class="form-item"><label>性别</label><select class="select" onchange="WZ.gender=this.value"><option ${WZ.gender==='男'?'selected':''}>男</option><option ${WZ.gender==='女'?'selected':''}>女</option></select></div>
+    <div class="form-item"><label>身高（cm）</label><input class="input" value="${esc(WZ.height)}" placeholder="如 175" oninput="WZ.height=this.value"></div>
+    <div class="form-item"><label>视力</label><input class="input" value="${esc(WZ.vision)}" placeholder="如 5.0" oninput="WZ.vision=this.value"></div>
+    <div class="form-item"><label>是否色盲色弱</label><select class="select" onchange="WZ.colorBlind=this.value"><option ${WZ.colorBlind!=='色盲色弱'?'selected':''}>正常</option><option ${WZ.colorBlind==='色盲色弱'?'selected':''}>色盲色弱</option></select></div>
+  </div>`;
+  const scoreSec=type?`<div class="form-sec">高考预估分</div>
+    <div class="form-item" style="margin-bottom:22px"><label>预估总分（0-750 分）</label><input class="input" type="number" value="${esc(WZ.estScore||'')}" placeholder="如 610" oninput="WZ.estScore=this.value"><div class="hint">用于评估综合成绩竞争力，不影响学考折算分。</div></div>`
+    :`<div class="form-sec">外语种类</div>
+    <div class="form-item" style="margin-bottom:22px"><label>外语种类</label><select class="select" onchange="WZ.foreign=this.value"><option ${WZ.foreign==='英语'?'selected':''}>英语</option><option ${WZ.foreign==='日语'?'selected':''}>日语</option><option ${WZ.foreign==='其他'||['俄语','德语','西班牙语'].includes(WZ.foreign)?'selected':''}>其他</option></select><div class="hint">部分高职提前招生专业对外语种类有要求。</div></div>`;
+  const zhSec=`<div class="form-sec">综合素质评价 <span class="card-sub">已填 ${nZh} / 4 项 · 按 A/B/C 三等评定，部分院校将其纳入折算或参考</span></div>
+    <div class="grade-picker" style="margin-bottom:24px">${zhKeys.map(k=>`<div class="gp-subject"><div class="gp-name">${k}</div><div class="gp-opts">${['A','B','C'].map(v=>`<button class="gp-opt ${WZ.zhsz[k]===v?'pick':''}" onclick="WZ.zhsz['${k}']='${v}';renderWizard()">${v}</button>`).join('')}</div></div>`).join('')}</div>`;
+  const sumSec=`<div class="form-sec">已选等级汇总</div>
+    <div style="background:var(--s50);border:1px solid var(--s100);border-radius:var(--r-md);padding:12px 14px;margin-bottom:22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+      <span style="font-size:14px;font-weight:700">已录入 <span class="num" style="color:var(--t700)">${nGrade}</span> / 10 科</span>
+      ${nGrade?type&&calc!=null?`<span style="font-size:13px">折算 <b class="num" style="color:var(--t700)">${calc}</b> 分</span><span class="card-sub">按常见折算规则估算，仅供参考</span>`:type?'<span class="card-sub">请继续在下方卡片中点选科目等级</span>':'<span class="card-sub">已全部录入，可在下方卡片中修改</span>':'<span class="card-sub">尚未选择任何科目等级，请在下方卡片中点选。</span>'}
+    </div>`;
+  const gradeSec=`<div class="form-sec">科目等级选择</div>
+    <div class="grade-picker">${SUBJECTS.map(s=>{const g=WZ.grades[s]||'';return `<div class="gp-subject"><div class="gp-name">${s}</div><div class="gp-opts">${['A','B','C','D','E','无'].map(v=>`<button class="gp-opt ${g===v?'pick':''}" onclick="WZ.grades['${s}']='${v}';renderWizard()">${v}</button>`).join('')}</div></div>`;}).join('')}</div>
+    <div class="card-sub" style="margin-top:8px">等级范围：A / B / C / D / E，未参考请选择“无”</div>`;
+  const xkSec=`<div class="form-sec">${type?'选考科目（7 选 3）':'高考选科'} <span class="card-sub">已选 ${WZ.subjects.length} / 3 · 生成方案时匹配院校专业选科要求</span></div>
+    <div class="chip-row" style="margin-bottom:24px">${['物理','化学','生物','政治','历史','地理','技术'].map(s=>`<button type="button" class="subject-pick ${WZ.subjects.includes(s)?'pick':''}" onclick="toggleSubject('${s}')">${s}</button>`).join('')}</div>`;
+  const order=type?zhSec+sumSec+gradeSec+xkSec:xkSec+zhSec+sumSec+gradeSec;
+  return `<div class="card-sub" style="margin-bottom:14px">录入 ${esc(u.name)} 的学考成绩与选考信息（管理员代填，可随时修改）· 字段与前端「成绩录入」页一致</div>
+  ${basic}
+  ${scoreSec}
+  ${order}
+  ${wzFooter()}`;
+}
+function toggleSubject(s){
+  const i=WZ.subjects.indexOf(s);
+  if(i>-1)WZ.subjects.splice(i,1);else if(WZ.subjects.length<3)WZ.subjects.push(s);else{toast('选科最多选择 3 门','error');return;}
+  renderWizard();
+}
+function wzMajor(){
+  const kw=WZ._kw||'',risk=WZ._risk||'all';
+  return `<div class="wz-split">
+    <div>
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <input class="input" style="flex:1;min-width:150px" placeholder="搜索院校 / 专业" value="${esc(kw)}" oninput="wzMajorFilter(this.value)">
+        <select class="select" onchange="WZ._risk=this.value;renderMajorList()"><option value="all" ${risk==='all'?'selected':''}>全部梯度</option><option value="chong" ${risk==='chong'?'selected':''}>冲</option><option value="wen" ${risk==='wen'?'selected':''}>稳</option><option value="bao" ${risk==='bao'?'selected':''}>保</option></select>
+      </div>
+      <div class="card-sub" style="margin-bottom:10px">可选志愿（<span id="wz-major-count">0</span>）· 点击添加</div>
+      <div id="wz-major-list"></div>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span class="card-title" style="font-size:14px">已选志愿</span><span class="badge-count num">${WZ.list.length} / 30</span></div>
+      <div style="min-height:120px">${WZ.list.length?WZ.list.map((m,i)=>`<div class="rl-item"><span class="rl-idx num">${i+1}</span><div class="rl-main"><div class="rl-name">${esc(m.school)} · ${esc(m.major)}</div><div class="rl-sub"><span class="risk-badge ${RISK_CLS[m.risk]}" style="margin-right:6px">${RISK_NAME[m.risk]}</span>${m.metrics[0]||''}</div></div>
+        <div class="rl-op"><button class="up" ${i===0?'disabled':''} onclick="moveMajor(${i},-1)" title="上移">${ic('chevL',14)}</button><button ${i===WZ.list.length-1?'disabled':''} onclick="moveMajor(${i},1)" title="下移">${ic('chevR',14)}</button><button class="del" onclick="WZ.list.splice(${i},1);renderWizard()" title="移除">${ic('x',14)}</button></div>
+      </div>`).join(''):'<div class="empty" style="padding:28px 10px"><div class="e-ico">'+ic('target',22)+'</div><p>从左侧添加院校专业志愿</p></div>'}
+      </div>
+      <div style="margin-top:12px;padding:12px 14px;background:var(--s50);border-radius:var(--r-md);font-size:12.5px;color:var(--muted)">按冲 / 稳 / 保梯度排序，志愿顺序将影响方案推荐优先级。</div>
+    </div>
+  </div>${wzFooter()}`;
+}
+function wzMajorPool(){
+  return (WZ.type==='sanyi'?sanyCandidates():gaozhiCandidates()).filter(c=>!WZ.list.find(x=>x.mkey===c.mkey));
+}
+function wzMajorFilter(v){WZ._kw=v;renderMajorList();}
+function renderMajorList(){
+  const kw=WZ._kw||'',risk=WZ._risk||'all';
+  const pool=wzMajorPool().filter(c=>(!kw||c.school.includes(kw)||c.major.includes(kw)));
+  const list=risk==='all'?pool:pool.filter(c=>c.risk===risk);
+  const box=$('#wz-major-list');if(!box)return;
+  const added=c=>WZ.list.find(x=>x.mkey===c.mkey);
+  const cardHtml=c=>`<div class="pr-card" style="margin-bottom:12px">
+    ${schoolCard(c)}
+    <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:12px">${added(c)?'<span class="badge-count" style="padding:4px 10px">已添加</span>':'<button class="btn btn-sm btn-primary" onclick="addMajor(\''+c.mkey+'\')">'+ic('plus',13)+' 添加</button>'}</div>
+  </div>`;
+  if(risk!=='all'){
+    box.innerHTML=list.length?list.map(cardHtml).join(''):'<div class="empty"><p>没有匹配的志愿（可切换梯度或清空关键词）</p></div>';
+  }else{
+    const groups=[['chong','冲刺院校推荐','录取概率偏低，重点争取'],['wen','稳妥院校推荐','录取概率较高，作为核心志愿'],['bao','保底院校推荐','降低整体风险']];
+    const html=groups.map(g=>{const gl=list.filter(c=>c.risk===g[0]);return gl.length?`<div style="margin-bottom:16px"><div class="rg-head"><span class="rg-badge ${RISK_CLS[g[0]]}">${RISK_NAME[g[0]]}</span><span class="rg-title">${g[1]}</span><span class="rg-count">${gl.length} 个可选</span><span class="rg-note">${g[2]}</span></div><div class="rg-cards">${gl.map(cardHtml).join('')}</div></div>`:'';}).join('');
+    box.innerHTML=html||'<div class="empty"><p>没有匹配的志愿（可清空关键词）</p></div>';
+  }
+  const cnt=$('#wz-major-count');if(cnt)cnt.textContent=list.length;
+}
+const SCH_SANY={浙江工业大学:{prop:'省重点',type:'综合类'},宁波大学:{prop:'双一流',type:'综合类'},浙江工商大学:{prop:'省重点',type:'财经类'},浙江中医药大学:{prop:'省重点',type:'医药类'},浙江师范大学:{prop:'省重点',type:'师范类'}};
+function gaozhiSchMeta(school){
+  const g=ROWS.gzyxk.find(x=>x.name===school);
+  if(!g)return {city:'',prop:'公办',type:'高职'};
+  const lv=g.level||'';
+  return {city:g.city||'',prop:g.nature||'公办',type:lv.indexOf('国家高水平')>-1?'双高计划':lv.indexOf('示范')>-1?'国家示范':lv.indexOf('省')>-1?'省示范':'公办高职'};
+}
+function matchReason(risk,school,major){
+  return risk==='chong'?('折算分接近该校「'+major+'」近 3 年录取低位，选考科目符合要求，可作为冲刺志愿。'):risk==='wen'?('折算分与该校「'+major+'」往年入围线匹配度高，录取概率较稳定，建议作为核心志愿。'):('折算分高于该校「'+major+'」近年入围线，录取概率较高，作为保底志愿降低整体风险。');
+}
+function sanyGroups(school){
+  const map={};
+  ROWS.sxbm.filter(r=>r.school===school).forEach(r=>{const k=r.group||'本专业';if(!map[k])map[k]={gname:k,xkReq:r.xk||'不限',majors:[]};if(map[k].majors.indexOf(r.mname)<0)map[k].majors.push(r.mname);});
+  return Object.keys(map).map(k=>map[k]);
+}
+function sanyCandidates(){
+  const bm=ROWS.sxbm,cs=ROWS.sxcs,lq=ROWS.sxlq;
+  return bm.map(r=>{
+    const c=cs.find(x=>x.mcode===r.mcode&&x.code===r.code),l=lq.find(x=>x.mcode===r.mcode&&x.code===r.code);
+    const score=88+((r.code.charCodeAt(3)%5)-2)*4;
+    const risk=score>=85?'chong':score>=79?'wen':'bao';
+    const delta=c?score-c.minScore:0;
+    const conf=Math.max(22,Math.min(88,52+delta*5));
+    const m=schMetaOf(r.school,SCH_SANY);
+    return {mkey:'s'+r.id,school:r.school,major:r.mname,risk,score,conf,confLv:conf>=70?'高':conf>=50?'中':'低',reason:matchReason(risk,r.school,r.mname),city:r.city||m.city||'',prop:m.prop,type:m.type,xk:r.xk,groups:sanyGroups(r.school),
+      metrics:[c?('初审入围分 '+c.minScore):'初审数据待发布',l?('录取最低 '+l.min):'录取数据待发布',r.xk?('选科 '+r.xk):'',('学费 '+r.fee+' 元')].filter(Boolean).slice(0,3)};
+  });
+}
+function gaozhiCandidates(){
+  const bm=ROWS.tzbm,cs=ROWS.tzcs,lq=ROWS.tzlq;
+  return bm.map(r=>{
+    const c=cs.find(x=>x.mcode===r.mcode&&x.code===r.code),l=lq.find(x=>x.mcode===r.mcode&&x.code===r.code);
+    const score=84+((r.code.charCodeAt(3)%5)-2)*3;
+    const risk=score>=83?'chong':score>=77?'wen':'bao';
+    const delta=c?score-c.minScore:0;
+    const conf=Math.max(20,Math.min(88,50+delta*4));
+    const m=gaozhiSchMeta(r.school);
+    return {mkey:'g'+r.id,school:r.school,major:r.mname,risk,score,conf,confLv:conf>=70?'高':conf>=50?'中':'低',reason:matchReason(risk,r.school,r.mname),city:m.city,prop:m.prop,type:m.type,xk:r.xk||'不限',
+      metrics:[c?('初审入围分 '+c.minScore):'初审数据待发布',l?('综测最低 '+l.zcMin):'综测数据待发布',('学费 '+r.fee+' 元')].filter(Boolean).slice(0,3)};
+  });
+}
+function schMetaOf(school,map){return map[school]||{city:'',prop:'省重点',type:'综合类'};}
+function schoolCard(it){
+  const lv=it.confLv||'中';
+  const city=it.city||'—';
+  const prop=it.prop||'省重点';
+  const type=it.type||'综合类';
+  const groups=(it.groups&&it.groups.length)?it.groups:(it.xk?[{gname:'本专业',xkReq:it.xk,majors:[it.major]}]:[]);
+  return `<div class="prc-top"><span class="risk-badge ${RISK_CLS[it.risk]}">${RISK_NAME[it.risk]}</span><span class="prc-school">${esc(it.school)}</span><span class="tag tag-gray">${esc(it.major)}</span>
+    <div class="prc-conf"><div class="pv num">${it.conf!=null?it.conf+'%':'—'}</div><div class="pl">置信度·${lv}</div></div></div>
+    <div class="prc-reason"><b>匹配理由：</b>${esc(it.reason||riskReason(it.risk))}</div>
+    <div class="prc-meta"><span class="chip">${esc(city)} · ${esc(prop)} · ${esc(type)}</span>${(it.metrics||[]).map(m=>'<span class="chip">'+m+'</span>').join('')}</div>
+    ${groups.map(g=>`<div class="prc-group"><b>${esc(g.gname)}</b><span class="chip" style="background:var(--s100);color:var(--muted);border:none">选考要求：${esc(g.xkReq)}</span><span class="pg-majors">本组包含：${esc(g.majors.join('、'))}</span></div>`).join('')}`;
+}
+function addMajor(mkey){
+  const c=(WZ.type==='sanyi'?sanyCandidates():gaozhiCandidates()).find(x=>x.mkey===mkey);
+  if(!c)return;
+  if(WZ.list.find(x=>x.mkey===mkey)){toast('该志愿已在列表中','info');return;}
+  if(WZ.list.length>=30){toast('志愿数量已达上限 30 个','error');return;}
+  WZ.list.push(c);renderWizard();toast('已添加志愿：'+c.school+' · '+c.major);
+}
+function moveMajor(i,d){
+  const j=i+d;if(j<0||j>=WZ.list.length)return;
+  const t=WZ.list[i];WZ.list[i]=WZ.list[j];WZ.list[j]=t;renderWizard();
+}
+function xkCalc(type,grades){
+  const m=type==='sanyi'?{A:10,B:8,C:6,D:4,E:2}:{A:90,B:80,C:70,D:60,E:50};
+  let sum=0,n=0;SUBJECTS.forEach(s=>{const g=grades[s];if(g&&m[g]){sum+=m[g];n++;}});
+  if(!n)return null;
+  return type==='sanyi'?sum:Math.round(sum/n);
+}
+function gradesText(grades){
+  return SUBJECTS.map(s=>s[0]+(grades[s]||'—')).join(' ');
+}
+function riskReason(r){
+  return r==='chong'?'学考折算分与近年入围线接近，可作为冲刺志愿重点准备校测，录取概率偏低但值得争取。'
+    :r==='wen'?'学考等级稳定，折算分高于近年入围线，录取概率较高，适合作为核心志愿。'
+    :'折算分远高于入围线，可作为保底志愿，降低整体风险。';
+}
+function formulaOf(type,item){
+  const tbl=type==='sanyi'?ROWS.sxlq:ROWS.tzlq;
+  const row=tbl.find(r=>r.school===item.school&&r.mname===item.major);
+  if(!row)return null;
+  if(type==='sanyi')return {hs:row.lqhsdesc,rule:row.zhrule,min:row.min};
+  return {hs:row.hsdesc,rule:row.zsrule,min:row.zcMin};
+}
+function planTimeline(type,year){
+  if(type==='sanyi'){
+    const bm=ROWS.sxbm[0]||{},cs=ROWS.sxcs[0]||{},zc=ROWS.sxzc[0]||{},lq=ROWS.sxlq[0]||{};
+    return [
+      {date:bm.time||(year+' 年 2-3 月'),title:'三位一体网上报名',desc:'报名时间：'+(bm.time||'按各校简章')+' · 需提交'+(bm.material||'学考成绩单、个人陈述等')},
+      {date:year+' 年 3-4 月',title:'初审结果公布',desc:(cs.ratio?'初审入围比例 '+(cs.ratio)+(cs.minScore?('，最低入围分 '+cs.minScore):''):'按各校初审规则公布入围名单')},
+      {date:zc.time||(year+' 年 4 月'),title:'综合素质测试（校测）',desc:(zc.form||'面试 / 笔试')+(zc.addr?(' · '+zc.addr):'')},
+      {date:year+' 年 6-7 月',title:'录取与综合分公布',desc:(lq.zhrule?('综合成绩规则：'+lq.zhrule):'按各校综合成绩计算规则录取')}
+    ];
+  }
+  const bm=ROWS.tzbm[0]||{},cs=ROWS.tzcs[0]||{},zc=ROWS.tzzc[0]||{},lq=ROWS.tzlq[0]||{};
+  return [
+    {date:year+' 年 3 月上旬',title:'招生章程发布',desc:'各高职院校陆续发布招生章程，明确折算规则、校测方式与招生计划。'},
+    {date:year+' 年 3 月中旬至 4 月上旬',title:'网上报名',desc:bm.material?'需提交'+bm.material:'登录各校招生网完成报名信息填写与材料上传，注意不同院校截止时间'},
+    {date:year+' 年 4 月中旬',title:'初审结果公布',desc:(cs.ratio?'初审入围比例 '+(cs.ratio)+(cs.minScore?('，最低入围分 '+cs.minScore):''):'按各校初审规则公布入围名单')},
+    {date:zc.time||(year+' 年 4 月下旬'),title:'职业适应性测试 / 面试',desc:(zc.form||'面试')+(zc.addr?(' · '+zc.addr):'')+'，按准考证时间参加，避免时间冲突'},
+    {date:year+' 年 5 月',title:'录取与确认',desc:(lq.zsrule?('折算公式：'+lq.zsrule):'按综合成绩从高到低录取')+' · 确认录取后将不再参加当年高考'}
+  ];
+}
+function planTips(type){
+  if(type==='sanyi')return {
+    strat:['冲刺院校可放在志愿前段争取，重点准备校测（面试 / 笔试）','学考等级与选科匹配是初审关键，注意各校学考换算规则差异','综合成绩构成各校不同（如高考60%+校测30%+学考10%），按院校公式核对'],
+    risk:['校测时间可能冲突，需核对各校校测安排','部分院校对选科、单科学考等级有硬性要求，填报前逐校确认','示例数据仅供原型演示，真实方案需以当年官方简章为准']
+  };
+  return {
+    strat:['一档多投：确认录取后将不再参加当年高考，慎重选择确认院校','优先关注折算分与自身学考等级匹配度高的院校，作为核心志愿重点准备校测','“冲刺”院校录取概率偏低，可放在前段争取，但需搭配保底志愿控制风险'],
+    risk:['各校学考折算规则、科目权重不同，请以当年章程为准','部分专业对身体条件（身高、视力、色觉）有限报要求','示例数据仅供原型演示，真实方案需以当年官方简章为准']
+  };
+}
+function planResultHtml(o){
+  const u=o.u||{},type=o.type,year=o.year||'2026';
+  const items=o.items||[];
+  const extra=o.extra||{};
+  const grades=Object.keys(extra.grades||{}).length?extra.grades:(u.grades||{});
+  const calc=xkCalc(type,grades);
+  const subjects=Array.isArray(extra.subjects)&&extra.subjects.length?extra.subjects:(u.subjects||[]);
+  const foreign=extra.foreign||u.foreign||'英语';
+  const groups=['chong','wen','bao'].map(r=>({r,list:items.filter(x=>x.risk===r)}));
+  const tips=planTips(type);
+  const tl=planTimeline(type,year);
+  const meta=o.meta||{};
+  const now=meta.createdAt||(new Date().toISOString().slice(0,10)+' '+new Date().toTimeString().slice(0,5));
+  const tname=type==='sanyi'?'三位一体':'高职提招';
+  const scoreDesc=type==='sanyi'?'A=10 B=8 C=6 D=4 口径':'A=90 B=80 C=70 D=60 口径';
+  const zhSrc=Object.keys(extra.zhsz||{}).length?extra.zhsz:(u.zhsz||{});
+  const zhText=Object.keys(zhSrc).length?Object.entries(zhSrc).filter((kv)=>kv[1]).map((kv)=>kv[0]+' '+kv[1]).join(' · '):'';
+  const estScore=extra.estScore||u.estScore||'';
+  const wantMajor=Array.isArray(u.wantMajor)&&u.wantMajor.length?u.wantMajor:[];
+  return `<div class="pr-hero">
+    <div class="pr-h-ico">${ic(type==='sanyi'?'book':'school',22)}</div>
+    <div>
+      <div class="pr-h-title">${esc(o.name||(tname+'方案 · '+year))} <span class="tag ${type==='sanyi'?'tag-teal':'tag-blue'}">${tname}</span> <span class="tag tag-gray">${year} 年</span></div>
+      <div class="pr-h-sub">考生：<b>${esc(u.name||'—')}</b> · ${esc(u.school||'')} · 规划老师：${esc(meta.creator||'张老师')} · 共 ${items.length} 个志愿（冲 ${items.filter(x=>x.risk==='chong').length} / 稳 ${items.filter(x=>x.risk==='wen').length} / 保 ${items.filter(x=>x.risk==='bao').length}）</div>
+    </div>
+    <div class="pr-h-meta"><span>方案生成：${esc(now.slice(0,10)+' '+now.slice(11))}</span><span>数据更新时间：2026-09-30 10:00</span></div>
+  </div>
+  <div class="pr-score-grid">
+    <div class="pr-score-card"><div class="psc-ico">${ic('award',17)}</div><div><div class="psc-cap">学考等级</div><div class="psc-val">${esc(gradesText(grades))}</div></div></div>
+    <div class="pr-score-card"><div class="psc-ico">${ic('layers',17)}</div><div><div class="psc-cap">${type==='sanyi'?'选考科目':'外语种类'}</div><div class="psc-val">${esc(type==='sanyi'?subjects.join('、')||'—':foreign)}</div>${type==='sanyi'?'':`<div class="psc-cap" style="margin-top:3px">${foreign==='英语'?'按英语科目折算；小语种需单独确认院校要求':'小语种需单独确认院校要求'}</div>`}</div></div>
+    <div class="pr-score-card"><div class="psc-ico">${ic('target',17)}</div><div><div class="psc-cap">意向专业</div><div class="psc-val">${esc(wantMajor.join('、')||'—')}</div></div></div>
+    <div class="pr-score-card"><div class="psc-ico">${ic(type==='sanyi'?'book':'school',17)}</div><div><div class="psc-cap">招生类型</div><div class="psc-val">${type==='sanyi'?'三位一体':'高职提前招生'}</div><div class="psc-cap" style="margin-top:3px">${type==='sanyi'?'省属三位一体 · 32 所本科高校':'一档多投 · 47 所高职院校'}</div></div></div>
+    ${zhText?`<div class="pr-score-card" style="grid-column:1/-1"><div class="psc-ico">${ic('award',17)}</div><div><div class="psc-cap">综合素质评价</div><div class="psc-val">${esc(zhText)}</div></div></div>`:''}
+    <div class="pr-score-card" style="grid-column:1/-1;background:var(--s25,#fafcfb)"><div class="psc-ico" style="background:var(--s100);color:var(--s800)">${ic('calculator',17)}</div><div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-end"><div><div class="psc-cap">预估高考分</div><div class="psc-val num" style="font-size:18px">${estScore?esc(estScore):'—'}</div></div><div><div class="psc-cap">学考折算分（测算）</div><div class="psc-val num" style="font-size:18px">${calc!=null?calc:'—'}</div></div><div style="align-self:center"><div class="psc-cap">折算口径</div><div class="psc-val" style="font-size:12px;font-weight:400;color:var(--muted)">${scoreDesc}</div></div></div></div>
+  </div>
+  ${groups.filter(g=>g.list.length).map(g=>`<div class="risk-group">
+    <div class="rg-head"><span class="rg-badge ${RISK_CLS[g.r]}">${RISK_NAME[g.r]}</span><span class="rg-title">${g.r==='chong'?'冲刺院校推荐':g.r==='wen'?'稳妥院校推荐':'保底院校推荐'}</span><span class="rg-count">${g.list.length} 个志愿</span><span class="rg-note">${g.r==='chong'?'录取概率偏低，重点争取校测':g.r==='wen'?'录取概率较高，作为核心志愿':'降低整体风险'}</span></div>
+    <div class="rg-cards">${g.list.map(it=>`<div class="pr-card">
+      ${schoolCard(it)}
+    </div>`).join('')}</div>
+  </div>`).join('')}
+  <div class="card-title" style="margin:20px 0 12px">${tname}重要时间节点</div>
+  <div class="pr-timeline">${tl.map(n=>`<div class="pr-tl-item"><div class="pt-date">${esc(n.date)}</div><div class="pt-title">${esc(n.title)}</div><div class="pt-desc">${esc(n.desc)}</div></div>`).join('')}</div>
+  <div class="pr-tips">
+    <div class="pr-tip-box"><h4>${ic('checkCircle',15)} 填报策略建议</h4><ul>${tips.strat.map(s=>`<li>${ic('checkCircle',14)}<span>${s}</span></li>`).join('')}</ul></div>
+    <div class="pr-tip-box"><h4>${ic('alert',15)} 风险提示</h4><ul>${tips.risk.map(s=>`<li>${ic('alertCircle',14)}<span>${s}</span></li>`).join('')}</ul></div>
+  </div>
+  <div class="card-title" style="margin:20px 0 12px">各校折算公式示例</div>
+  <div class="table-wrap"><table class="tbl"><colgroup><col style="width:30%"><col style="width:34%"><col style="width:36%"></colgroup>
+  <thead><tr><th>院校 · 专业</th><th>学考换算规则</th><th>综合成绩计算</th></tr></thead>
+  <tbody>${items.slice(0,5).map(it=>{const f=formulaOf(type,it);return `<tr><td style="font-weight:600">${esc(it.school)}<br><span style="font-weight:400;color:var(--muted)">${esc(it.major)}</span></td><td>${esc(f?f.hs:'—')}</td><td>${esc(f?f.rule:'—')}</td></tr>`;}).join('')}</tbody></table></div>
+  <div class="card-title" style="margin:20px 0 12px">已选志愿（${items.length} / 30）</div>
+  <div class="pr-selected">${items.map((it,i)=>`<span class="sel-chip"><span class="n num">${i+1}</span>${esc(it.school)} · ${esc(it.major)} <span class="risk-badge ${RISK_CLS[it.risk]}" style="height:16px;font-size:10px">${RISK_NAME[it.risk]}</span></span>`).join('')}</div>`;
+}
+function wzPreview(){
+  const u=userById(WZ.uid);
+  if(!WZ.list.length)return '<div class="empty"><p>尚未选择志愿，请返回上一步添加</p></div>';
+  const name=WZ.name||(WZ.type==='sanyi'?'三位一体':'高职提招')+'方案 · '+WZ.year;
+  return `<div class="card-sub" style="margin-bottom:14px">预览采用与前端一致的方案结果呈现：成绩概览、冲 / 稳 / 保院校推荐、时间节点与填报建议。确认无误后点击「生成方案」保存。</div>
+  <div style="display:flex;gap:10px;margin-bottom:18px"><div class="form-item" style="flex:1;max-width:480px"><label>方案名称</label><input class="input" id="wz-name" value="${esc(name)}"></div></div>
+  ${planResultHtml({name,type:WZ.type,year:WZ.year,u,items:WZ.list,extra:{gender:WZ.gender,height:WZ.height,vision:WZ.vision,colorBlind:WZ.colorBlind,zhsz:WZ.zhsz,grades:WZ.grades,subjects:WZ.subjects,foreign:WZ.foreign,estScore:WZ.estScore},meta:{creator:'张老师',createdAt:new Date().toISOString().slice(0,10)+' '+new Date().toTimeString().slice(0,5)}})}
+  <div class="wz-actions" style="margin-top:18px"><button class="btn" onclick="wzBack()">${ic('chevL',14)} 上一步</button>
+  <button class="btn btn-primary btn-lg" onclick="generatePlan()">${ic('spark',16)} 生成方案</button></div>`;
+}
+function wzDone(){
+  const u=userById(WZ.uid);
+  return `<div style="text-align:center;padding:46px 20px 30px">
+    <div style="width:64px;height:64px;margin:0 auto 18px;border-radius:50%;background:var(--success-bg);color:#047857;display:flex;align-items:center;justify-content:center">${ic('check',30)}</div>
+    <h2 style="font-size:19px;font-weight:700">方案已生成</h2>
+    <p class="card-sub" style="margin-top:8px">已为 <b>${esc(u?u.name:'该用户')}</b> 生成「${esc(WZ.name)}」，共 ${WZ.list.length} 个志愿（冲 ${WZ.list.filter(x=>x.risk==='chong').length} / 稳 ${WZ.list.filter(x=>x.risk==='wen').length} / 保 ${WZ.list.filter(x=>x.risk==='bao').length}）</p>
+    <div style="display:flex;justify-content:center;gap:10px;margin-top:24px"><button class="btn" onclick="WZ.step=1;WZ.uid=null;WZ.list=[];renderWizard()">${ic('plus',14)} 再规划一个</button><button class="btn btn-primary" onclick="navTo('#/user/${WZ.uid}')">${ic('eye',14)} 查看用户方案</button></div>
+  </div>`;
+}
+function wzNext(){
+  const u=userById(WZ.uid);
+  if(WZ.step===1&&!WZ.uid){toast('请先选择用户','error');return;}
+  if(WZ.step===2&&!WZ.type){toast('请选择方案类型','error');return;}
+  if(WZ.step===3){
+    if(WZ.subjects.length!==3){toast('请选择 3 门选考科目','error');return;}
+    const empty=SUBJECTS.filter(s=>!WZ.grades[s]);
+    if(empty.length){toast('请完成全部 10 门学考等级录入（未填：'+empty.join('、')+'）','error');return;}
+  }
+  if(WZ.step===4&&!WZ.list.length){toast('请至少添加 1 个志愿','error');return;}
+  WZ.step++;renderWizard();
+}
+function wzBack(){WZ.step--;renderWizard();}
+function renderWizard(){$('#wz-body').innerHTML=wzStepHtml();document.querySelectorAll('.steps .step').forEach((el,i)=>{const s=i+1;el.className='step '+(WZ.step===s?'active':WZ.step>s?'done':'');el.querySelector('.s-dot').innerHTML=WZ.step>s?ic('check',15):s;});if(WZ.step===4)renderMajorList();}
+function generatePlan(){
+  const name=($('#wz-name')?$('#wz-name').value.trim():WZ.name)||(WZ.type==='sanyi'?'三位一体':'高职提招')+'方案 · '+WZ.year;
+  WZ.name=name;
+  const u=userById(WZ.uid);if(!u){toast('用户不存在','error');return;}
+  const id='P'+String(PLANS.length+1).padStart(4,'0');
+  PLANS.push({id,uid:u.id,userName:u.name,name,type:WZ.type,year:WZ.year,status:'generated',src:'planner',creator:'张老师',createdAt:new Date().toISOString().slice(0,10)+' '+new Date().toTimeString().slice(0,5),updatedAt:'',extra:{gender:WZ.gender,height:WZ.height,vision:WZ.vision,colorBlind:WZ.colorBlind,zhsz:WZ.zhsz,grades:WZ.grades,subjects:WZ.subjects.slice(),foreign:WZ.foreign,estScore:WZ.estScore},items:WZ.list.map(m=>({risk:m.risk,school:m.school,major:m.major,score:m.score,metrics:m.metrics,conf:m.conf,confLv:m.confLv,reason:m.reason,city:m.city,prop:m.prop,type:m.type,xk:m.xk,groups:m.groups}))});
+  u.planCount=plansOf(u.id).length;
+  WZ.step=6;renderWizard();toast('方案已生成并保存');
+}
+/* ===================== 数据管理 ===================== */
+const DT={key:'',kw:'',page:1,pageSize:8,sel:new Set(),year:'all'};
+function vData(key){
+  const t=TBL[key];if(!t)return '<div class="empty"><p>未找到数据表</p></div>';
+  if(DT.key!==key){DT.key=key;DT.kw='';DT.page=1;DT.sel=new Set();DT.year='all';}
+  return dataPageHtml(t);
+}
+function dataPageHtml(t){
+  const rows=filterDataRows(t);
+  const pages=Math.max(1,Math.ceil(rows.length/DT.pageSize));
+  if(DT.page>pages)DT.page=pages;
+  const start=(DT.page-1)*DT.pageSize;
+  const cols=t.fields.slice(0,7);
+  const hasYear='year' in (ROWS[t.key][0]||{});
+  const years=[...new Set(ROWS[t.key].map(r=>r.year).filter(Boolean))];
+  return `<div class="page-head"><div><h1>${esc(t.name)}</h1><div class="ph-sub">${esc(t.desc)} · 示例数据（字段参照《数据库字段》腾讯文档）</div></div>
+  <div class="ph-actions">
+    <button class="btn" onclick="uploadModal('${t.key}')">${ic('upload',14)} 批量上传</button>
+    <button class="btn" onclick="toast('已生成 Excel 模板：'+'${t.name}'+'.xlsx','info')">${ic('download',14)} 下载模板</button>
+    <button class="btn" onclick="toast('已导出当前筛选数据','info')">${ic('download',14)} 导出</button>
+    <button class="btn btn-primary" onclick="openRowEdit('${t.key}')">${ic('plus',14)} 新增数据</button>
+  </div></div>
+  <div class="card">
+    <div class="toolbar">
+      <input type="checkbox" class="checkbox" id="dt-ck-all" onchange="dtToggleAll(this.checked)">
+      <span class="tb-title">${esc(t.name)}</span><span class="badge-count num" id="dt-count">${ROWS[t.key].length} 条</span>
+      <div class="spacer"></div>
+      ${hasYear?`<span class="fb-label">年份</span><select class="select" style="height:30px" onchange="DT.year=this.value;DT.page=1;dtRefreshPart()"><option value="all">全部</option>${years.map(y=>'<option value="'+y+'" '+(DT.year===y?'selected':'')+'>'+y+'</option>').join('')}</select>`:''}
+      <input class="input" style="width:200px;height:30px" placeholder="搜索表内数据" value="${esc(DT.kw)}" oninput="dtFilter('${t.key}',this.value)">
+      <button class="btn btn-sm btn-ghost" onclick="toast('数据已刷新','info')">${ic('refresh',14)}</button>
+      <button class="btn btn-sm ${DT.sel.size?'btn-danger':'btn-ghost'}" ${DT.sel.size?'':'disabled'} onclick="dtBatchDel('${t.key}')">${ic('trash',14)} 删除选中 (${DT.sel.size})</button>
+    </div>
+    <div class="table-wrap">
+    <table class="tbl"><colgroup><col style="width:36px">${cols.map(c=>'<col style="width:'+(c.type==='textarea'||['desc','note','material','remark','desc2','remind','minDesc','zdesc','hsdesc','zsdesc'].includes(c.k)?'16%':'11%')+'">').join('')}<col style="width:130px"></colgroup>
+      <thead><tr><th></th>${cols.map(c=>'<th>'+c.label+(c.hint?'<span style="color:#b6c2cf;font-weight:400;margin-left:3px" title="'+esc(c.hint)+'">?</span>':'')+'</th>').join('')}<th>操作</th></tr></thead>
+      <tbody id="dt-tbody">${dataRowsHtml(t,rows.slice(start,start+DT.pageSize))}</tbody>
+    </table>
+    </div>
+    <div class="pager" id="dt-pager">${dataPagerHtml(t,rows.length,pages)}</div>
+  </div>`;
+}
+function filterDataRows(t){
+  let rows=ROWS[t.key].slice();
+  if(DT.kw)rows=rows.filter(r=>Object.values(r).some(v=>String(v||'').includes(DT.kw)));
+  if(DT.year!=='all')rows=rows.filter(r=>r.year===DT.year);
+  return rows;
+}
+function dataRowsHtml(t,rows){
+  const cols=t.fields.slice(0,7);
+  if(!rows.length)return `<tr><td colspan="${cols.length+2}"><div class="empty"><div class="e-ico">${ic('db',24)}</div><p>暂无匹配数据</p><button class="btn" onclick="DT.kw='';DT.year='all';DT.page=1;dtRefreshPart()">清除筛选</button></div></td></tr>`;
+  return rows.map(r=>`<tr>
+    <td><input type="checkbox" class="checkbox" ${DT.sel.has(r.id)?'checked':''} onchange="dtToggle('${t.key}','${esc(r.id)}',this.checked)"></td>
+    ${cols.map(c=>{const v=r[c.k];const clk="viewRow('"+t.key+"','"+esc(r.id)+"')";
+      let html='<span class="rowlink" title="点击查看详情" onclick="'+clk+'">'+esc(v)+'</span>';
+      if(c.type==='number')html='<span class="num" style="cursor:pointer" onclick="'+clk+'">'+fmt(v)+'</span>';
+      if(c.k==='semy'||c.k==='ddb'||c.k==='hz'||c.k==='jianbao'||c.k==='ssd'||c.k==='bsd')html='<span class="tag '+(v==='限报'||v==='是'?'tag-red':'tag-green')+'" style="cursor:pointer" onclick="'+clk+'">'+esc(v||'—')+'</span>';
+      if(c.k==='level'||c.k==='nature')html='<span class="tag tag-gray" style="cursor:pointer" onclick="'+clk+'">'+esc(v||'—')+'</span>';
+      return '<td>'+html+'</td>';}).join('')}
+    <td><div class="op-links"><button onclick="viewRow('${t.key}','${esc(r.id)}')">查看</button><button onclick="openRowEdit('${t.key}','${esc(r.id)}')">编辑</button><button class="danger" onclick="delRow('${t.key}','${esc(r.id)}')">删除</button></div></td>
+  </tr>`).join('');
+}
+function dataPagerHtml(t,total,pages){
+  return `<span class="pager-info">共 ${total} 条 · 第 ${DT.page}/${pages} 页 · 每页 ${DT.pageSize} 条</span>
+  <div class="pager-btns"><button class="pg" ${DT.page<=1?'disabled':''} onclick="DT.page--;dtRefreshPart()">${ic('chevL',13)}</button>${Array.from({length:Math.min(pages,7)},(_,i)=>`<button class="pg ${i+1===DT.page?'active':''}" onclick="DT.page=${i+1};dtRefreshPart()">${i+1}</button>`).join('')}${pages>7?'<span style="color:var(--muted);font-size:12px">…</span>':''}<button class="pg" ${DT.page>=pages?'disabled':''} onclick="DT.page++;dtRefreshPart()">${ic('chevR',13)}</button></div>`;
+}
+function dtFilter(key,v){DT.kw=v;DT.page=1;dtRefreshPart();}
+function dtRefreshPart(){
+  const t=TBL[DT.key];if(!t)return;
+  const rows=filterDataRows(t);
+  const pages=Math.max(1,Math.ceil(rows.length/DT.pageSize));
+  if(DT.page>pages)DT.page=pages;
+  const start=(DT.page-1)*DT.pageSize;
+  $('#dt-tbody').innerHTML=dataRowsHtml(t,rows.slice(start,start+DT.pageSize));
+  $('#dt-pager').innerHTML=dataPagerHtml(t,rows.length,pages);
+  $('#dt-count').textContent=ROWS[t.key].length+' 条';
+  const all=$('#dt-ck-all');if(all)all.checked=DT.sel.size===rows.length&&rows.length>0;
+}
+function renderData(key){router();}
+function dtToggle(key,id,on){const row=ROWS[key].find(r=>r.id===id);if(!row)return;on?DT.sel.add(id):DT.sel.delete(id);const all=$('#dt-ck-all');if(all)all.checked=DT.sel.size===ROWS[key].length;}
+function dtToggleAll(on){const t=TBL[DT.key];if(!t)return;DT.sel.clear();if(on)ROWS[t.key].forEach(r=>DT.sel.add(r.id));dtRefreshPart();}
+function dtBatchDel(key){
+  const n=DT.sel.size;
+  confirmModal({title:'批量删除数据',message:'确定要删除选中的 <b>'+n+'</b> 条记录吗？该操作不可恢复。',danger:true,okText:'删除',onOk:()=>{
+    DT.sel.forEach(id=>{const i=ROWS[key].findIndex(r=>r.id===id);if(i>-1)ROWS[key].splice(i,1);});
+    DT.sel.clear();renderData(key);toast('已删除 '+n+' 条记录');
+  }});
+}
+/* —— 行查看 / 新增 / 编辑 —— */
+function viewRow(key,id){
+  const t=TBL[key],r=ROWS[key].find(x=>x.id===id);if(!r)return;
+  openModal(`<div class="modal-head"><h3>${esc(t.name)} · 记录详情</h3><button class="icon-btn" onclick="closeModal()">${ic('x',16)}</button></div>
+  <div class="modal-body">
+    <div class="detail-grid">${t.fields.map(f=>`<div class="detail-item"><div class="dk">${f.label}${f.hint?'<div style="font-size:10.5px;color:#b6c2cf">'+esc(f.hint)+'</div>':''}</div><div class="dv">${esc(fmt(r[f.k]))}</div></div>`).join('')}</div>
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--s100);display:flex;gap:16px;font-size:11.5px;color:#94a3b8"><span>记录ID：${esc(r.id)}</span><span>创建人：张老师</span><span>更新时间：2026-09-30 18:22</span></div>
+  </div>
+  <div class="modal-foot"><button class="btn" onclick="closeModal()">关闭</button><button class="btn btn-primary" onclick="openRowEdit('${key}','${esc(r.id)}');">编辑</button></div>`,'modal-lg');
+}
+function openRowEdit(key,id){
+  const t=TBL[key],r=id?ROWS[key].find(x=>x.id===id):null;
+  openModal(`<div class="modal-head"><h3>${r?'编辑记录':'新增记录'} · ${esc(t.name)}</h3><button class="icon-btn" onclick="closeModal()">${ic('x',16)}</button></div>
+  <div class="modal-body"><div class="form-grid">
+    ${t.fields.map(f=>{const v=r?r[f.k]:'';let ctl;
+      if(f.type==='select')ctl=`<select class="select" id="rf-${f.k}">${f.opts.map(o=>'<option value="'+o+'" '+(String(v)===o?'selected':'')+'>'+o+'</option>').join('')}</select>`;
+      else if(f.type==='textarea')ctl=`<textarea class="input" id="rf-${f.k}" style="height:64px;padding:8px 12px;resize:vertical" placeholder="请输入${f.label}">${esc(v)}</textarea>`;
+      else if(f.type==='number')ctl=`<input class="input" id="rf-${f.k}" type="number" value="${esc(v)}" placeholder="请输入${f.label}">`;
+      else ctl=`<input class="input" id="rf-${f.k}" value="${esc(v)}" placeholder="请输入${f.label}">`;
+      return `<div class="form-item ${f.type==='textarea'?'full':''}"><label>${f.label}${f.k==='code'||f.k==='id'||f.k==='school'||f.k==='mname'?'<span class="req">*</span>':''}${f.hint?'<span class="hint">（'+esc(f.hint)+'）</span>':''}</label>${ctl}</div>`;}).join('')}
+  </div></div>
+  <div class="modal-foot"><button class="btn" onclick="closeModal()">取消</button><button class="btn btn-primary" id="row-save">${r?'保存修改':'创建记录'}</button></div>`,'modal-xl');
+  $('#row-save').onclick=()=>{
+    const data={};let ok=true;
+    t.fields.forEach(f=>{const el=$('#rf-'+f.k);if(!el){data[f.k]='';return;}
+      data[f.k]=f.type==='number'?(el.value?Number(el.value):''):el.value;
+      if((f.k==='code'||f.k==='id'||f.k==='school'||f.k==='mname')&&!data[f.k])ok=false;});
+    if(!ok){toast('请填写必填字段（带 * 号）','error');return;}
+    if(r){Object.assign(r,data);toast('记录已更新');}
+    else{const nid='R'+Date.now().toString(36).toUpperCase();ROWS[key].unshift(Object.assign({id:nid},data));toast('记录已创建');}
+    closeModal();renderData(key);
+  };
+}
+function delRow(key,id){
+  confirmModal({title:'删除记录',message:'确定要删除这条记录吗？该操作不可恢复。',danger:true,okText:'删除',onOk:()=>{const i=ROWS[key].findIndex(r=>r.id===id);if(i>-1)ROWS[key].splice(i,1);renderData(key);toast('记录已删除');}});
+}
+/* —— 批量上传 —— */
+let UP={table:'',fileName:'',step:1,ok:0,err:0};
+function uploadModal(tableKey){
+  UP={table:tableKey,fileName:'',step:1,ok:0,err:0};
+  const name=uploadName(tableKey);
+  openModal(`<div class="modal-head"><h3>批量上传 · ${esc(name)}</h3><button class="icon-btn" onclick="closeModal()">${ic('x',16)}</button></div>
+  <div class="modal-body" id="up-body">${uploadStepHtml()}</div>`,'modal-lg');
+}
+function uploadName(tableKey){
+  if(tableKey==='users')return '用户列表';
+  const t=TBL[tableKey];return t?t.name:tableKey;
+}
+function uploadStepHtml(){
+  const name=uploadName(UP.table);
+  if(UP.step===1)return `<div class="upload-drop" id="up-drop" onclick="$('#up-file').click()" ondragover="this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="upDrop(event)">
+    <div class="ud-ico">${ic('upload',24)}</div>
+    <h4>将 Excel 文件拖到此处，或点击选择文件</h4>
+    <p>支持 .xlsx / .csv 格式，单次不超过 5MB · 表头需与下载模板保持一致</p>
+    <button class="btn btn-primary">${ic('file',14)} 选择文件</button>
+    <input type="file" id="up-file" accept=".xlsx,.xls,.csv" style="display:none" onchange="upPick(this)">
+    <div style="margin-top:16px;font-size:12.5px;color:var(--muted)">首次使用请先 <a href="javascript:;" onclick="toast('已生成模板：'+'${esc(name)}'+'.xlsx','info')">下载模板</a>，按模板列名填写后上传，系统将按字段自动校验。</div>
+  </div>`;
+  if(UP.step===2)return `<div class="upload-file"><div style="color:var(--t700)">${ic('file',22)}</div><div class="uf-name">${esc(UP.fileName)}</div><span class="tag tag-green">已解析</span></div>
+  <div class="upload-result">
+    <div class="ur-box ur-ok"><div class="ur-num num">${UP.ok}</div><div class="ur-lbl">校验通过</div></div>
+    <div class="ur-box ur-err"><div class="ur-num num">${UP.err}</div><div class="ur-lbl">校验失败</div></div>
+    <div class="ur-box ur-skip"><div class="ur-num num">0</div><div class="ur-lbl">跳过行</div></div>
+  </div>
+  <div class="card-sub" style="margin-bottom:10px">校验结果预览（失败行不会导入）</div>
+  <div class="table-wrap" style="max-height:220px;overflow-y:auto;border:1px solid var(--s100);border-radius:var(--r-md)">
+  <table class="tbl"><colgroup><col style="width:13%"><col style="width:27%"><col style="width:35%"><col style="width:25%"></colgroup>
+  <thead><tr><th>行号</th><th>院校 / 用户</th><th>专业 / 姓名</th><th>校验结果</th></tr></thead>
+  <tbody>${UP.err>0?`<tr class="err-row"><td>3</td><td>示例大学</td><td>示例专业</td><td>院校代码为空</td></tr>`:''}${Array.from({length:Math.min(UP.ok,3)},(_,i)=>`<tr><td class="num">${5+i}</td><td>示例大学</td><td>示例专业</td><td><span class="tag tag-green">通过</span></td></tr>`).join('')}</tbody></table></div>
+  <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
+    <button class="btn" onclick="UP.step=1;$('#up-body').innerHTML=uploadStepHtml()">重新选择</button>
+    <button class="btn btn-primary" id="up-import" onclick="toast('已导入 '+UP.ok+' 条数据');closeModal();router();">确认导入 ${UP.ok} 条</button>
+  </div>`;
+}
+function upPick(input){
+  const f=input.files&&input.files[0];
+  if(!f)return;
+  UP.fileName=f.name;UP.step=2;UP.ok=12;UP.err=2;
+  $('#up-body').innerHTML=uploadStepHtml();
+  toast('文件解析完成：共 14 行数据','info');
+}
+function upDrop(e){e.preventDefault();const f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)upPick({files:[f]});}
+/* ===================== 初始化 ===================== */
+renderNav();
+if(!location.hash)location.hash='#/login';
+router();
+</script>
+</body>
+</html>
