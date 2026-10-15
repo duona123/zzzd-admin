@@ -1672,24 +1672,21 @@ function dataPageHtml(t){
   const years=[...new Set(ROWS[t.key].map(r=>r.year).filter(Boolean))];
   return `<div class="page-head"><div><h1>${esc(t.name)}</h1><div class="ph-sub">${esc(t.desc)} · 示例数据（字段参照《数据库字段》腾讯文档）</div></div>
   <div class="ph-actions">
-    <button class="btn" onclick="uploadModal('${t.key}')">${ic('upload',14)} 批量上传</button>
+    <span class="tag tag-gray" style="align-self:center">数据只读 · 不可编辑</span>
     <button class="btn" onclick="toast('已生成 Excel 模板：'+'${t.name}'+'.xlsx','info')">${ic('download',14)} 下载模板</button>
     <button class="btn" onclick="toast('已导出当前筛选数据','info')">${ic('download',14)} 导出</button>
-    <button class="btn btn-primary" onclick="openRowEdit('${t.key}')">${ic('plus',14)} 新增数据</button>
   </div></div>
   <div class="card">
     <div class="toolbar">
-      <input type="checkbox" class="checkbox" id="dt-ck-all" onchange="dtToggleAll(this.checked)">
       <span class="tb-title">${esc(t.name)}</span><span class="badge-count num" id="dt-count">${ROWS[t.key].length} 条</span>
       <div class="spacer"></div>
       ${hasYear?`<span class="fb-label">年份</span><select class="select" style="height:30px" onchange="DT.year=this.value;DT.page=1;dtRefreshPart()"><option value="all">全部</option>${years.map(y=>'<option value="'+y+'" '+(DT.year===y?'selected':'')+'>'+y+'</option>').join('')}</select>`:''}
       <input class="input" style="width:200px;height:30px" placeholder="搜索表内数据" value="${esc(DT.kw)}" oninput="dtFilter('${t.key}',this.value)">
       <button class="btn btn-sm btn-ghost" onclick="toast('数据已刷新','info')">${ic('refresh',14)}</button>
-      <button class="btn btn-sm ${DT.sel.size?'btn-danger':'btn-ghost'}" ${DT.sel.size?'':'disabled'} onclick="dtBatchDel('${t.key}')">${ic('trash',14)} 删除选中 (${DT.sel.size})</button>
     </div>
     <div class="table-wrap">
-    <table class="tbl"><colgroup><col style="width:36px">${cols.map(c=>'<col style="width:'+(c.type==='textarea'||['desc','note','material','remark','desc2','remind','minDesc','zdesc','hsdesc','zsdesc'].includes(c.k)?'16%':'11%')+'">').join('')}<col style="width:130px"></colgroup>
-      <thead><tr><th></th>${cols.map(c=>'<th>'+c.label+(c.hint?'<span style="color:#b6c2cf;font-weight:400;margin-left:3px" title="'+esc(c.hint)+'">?</span>':'')+'</th>').join('')}<th>操作</th></tr></thead>
+    <table class="tbl"><colgroup>${cols.map(c=>'<col style="width:'+(c.type==='textarea'||['desc','note','material','remark','desc2','remind','minDesc','zdesc','hsdesc','zsdesc'].includes(c.k)?'16%':'11%')+'">').join('')}<col style="width:90px"></colgroup>
+      <thead><tr>${cols.map(c=>'<th>'+c.label+(c.hint?'<span style="color:#b6c2cf;font-weight:400;margin-left:3px" title="'+esc(c.hint)+'">?</span>':'')+'</th>').join('')}<th>操作</th></tr></thead>
       <tbody id="dt-tbody">${dataRowsHtml(t,rows.slice(start,start+DT.pageSize))}</tbody>
     </table>
     </div>
@@ -1704,16 +1701,15 @@ function filterDataRows(t){
 }
 function dataRowsHtml(t,rows){
   const cols=t.fields.slice(0,7);
-  if(!rows.length)return `<tr><td colspan="${cols.length+2}"><div class="empty"><div class="e-ico">${ic('db',24)}</div><p>暂无匹配数据</p><button class="btn" onclick="DT.kw='';DT.year='all';DT.page=1;dtRefreshPart()">清除筛选</button></div></td></tr>`;
+  if(!rows.length)return `<tr><td colspan="${cols.length+1}"><div class="empty"><div class="e-ico">${ic('db',24)}</div><p>暂无匹配数据</p><button class="btn" onclick="DT.kw='';DT.year='all';DT.page=1;dtRefreshPart()">清除筛选</button></div></td></tr>`;
   return rows.map(r=>`<tr>
-    <td><input type="checkbox" class="checkbox" ${DT.sel.has(r.id)?'checked':''} onchange="dtToggle('${t.key}','${esc(r.id)}',this.checked)"></td>
     ${cols.map(c=>{const v=r[c.k];const clk="viewRow('"+t.key+"','"+esc(r.id)+"')";
       let html='<span class="rowlink" title="点击查看详情" onclick="'+clk+'">'+esc(v)+'</span>';
       if(c.type==='number')html='<span class="num" style="cursor:pointer" onclick="'+clk+'">'+fmt(v)+'</span>';
       if(c.k==='semy'||c.k==='ddb'||c.k==='hz'||c.k==='jianbao'||c.k==='ssd'||c.k==='bsd')html='<span class="tag '+(v==='限报'||v==='是'?'tag-red':'tag-green')+'" style="cursor:pointer" onclick="'+clk+'">'+esc(v||'—')+'</span>';
       if(c.k==='level'||c.k==='nature')html='<span class="tag tag-gray" style="cursor:pointer" onclick="'+clk+'">'+esc(v||'—')+'</span>';
       return '<td>'+html+'</td>';}).join('')}
-    <td><div class="op-links"><button onclick="viewRow('${t.key}','${esc(r.id)}')">查看</button><button onclick="openRowEdit('${t.key}','${esc(r.id)}')">编辑</button><button class="danger" onclick="delRow('${t.key}','${esc(r.id)}')">删除</button></div></td>
+    <td><div class="op-links"><button onclick="viewRow('${t.key}','${esc(r.id)}')">查看</button></div></td>
   </tr>`).join('');
 }
 function dataPagerHtml(t,total,pages){
@@ -1730,7 +1726,6 @@ function dtRefreshPart(){
   $('#dt-tbody').innerHTML=dataRowsHtml(t,rows.slice(start,start+DT.pageSize));
   $('#dt-pager').innerHTML=dataPagerHtml(t,rows.length,pages);
   $('#dt-count').textContent=ROWS[t.key].length+' 条';
-  const all=$('#dt-ck-all');if(all)all.checked=DT.sel.size===rows.length&&rows.length>0;
 }
 function renderData(key){router();}
 function dtToggle(key,id,on){const row=ROWS[key].find(r=>r.id===id);if(!row)return;on?DT.sel.add(id):DT.sel.delete(id);const all=$('#dt-ck-all');if(all)all.checked=DT.sel.size===ROWS[key].length;}
@@ -1750,7 +1745,7 @@ function viewRow(key,id){
     <div class="detail-grid">${t.fields.map(f=>`<div class="detail-item"><div class="dk">${f.label}${f.hint?'<div style="font-size:10.5px;color:#b6c2cf">'+esc(f.hint)+'</div>':''}</div><div class="dv">${esc(fmt(r[f.k]))}</div></div>`).join('')}</div>
     <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--s100);display:flex;gap:16px;font-size:11.5px;color:#94a3b8"><span>记录ID：${esc(r.id)}</span><span>创建人：张老师</span><span>更新时间：2026-09-30 18:22</span></div>
   </div>
-  <div class="modal-foot"><button class="btn" onclick="closeModal()">关闭</button><button class="btn btn-primary" onclick="openRowEdit('${key}','${esc(r.id)}');">编辑</button></div>`,'modal-lg');
+  <div class="modal-foot"><button class="btn" onclick="closeModal()">关闭</button></div>`,'modal-lg');
 }
 function openRowEdit(key,id){
   const t=TBL[key],r=id?ROWS[key].find(x=>x.id===id):null;
